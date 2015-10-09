@@ -30,12 +30,11 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-	done(null, {id: id, username: id});
+	done(null, {id: id, username: id, usertype: id});
 });
 
 //routes
-require(path.join(__dirname, 'routes'))(app, passport);
-require(path.join(__dirname, 'authentication-manager'))(app, passport, passportLocal);
+require(path.join(__dirname, 'routes'))(app);
 
 //create a secure server with https and pass our credentials
 var server = https.createServer({
