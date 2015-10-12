@@ -1,0 +1,56 @@
+<div id="text">Test center utilization by date range:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+		From:<select name="from_term">
+			{{#each terms}}
+				<option value="{{value}}">{{name}}</option>
+			{{/each}}
+		</select>
+		<select name="from_month">
+			<option value="1">January</option>
+			<option value="2">February</option>
+			<option value="3">March</option>
+			<option value="4">April</option>
+			<option value="5">May</option>
+			<option value="6">June</option>
+			<option value="7">July</option>
+			<option value="8">August</option>
+			<option value="9">September</option>
+			<option value="10">October</option>
+			<option value="11">November</option>
+			<option value="12">December</option>
+		</select><input type="number" name="from_day" value="1" min="1" max="31">
+		To: <select name="to_term">
+			{{#each terms}}
+				<option value="{{value}}">{{name}}</option>
+			{{/each}}
+		</select>
+		<select name="to_month">
+			<option value="1">January</option>
+			<option value="2">February</option>
+			<option value="3">March</option>
+			<option value="4">April</option>
+			<option value="5">May</option>
+			<option value="6">June</option>
+			<option value="7">July</option>
+			<option value="8">August</option>
+			<option value="9">September</option>
+			<option value="10">October</option>
+			<option value="11">November</option>
+			<option value="12">December</option>
+		</select><input type="number" name="to_day" value="1" min="1" max="31">
+		<input type="submit" value="Generate">
+	</form>
+	<table id="data">
+		<tr>
+			<th>Day</th>
+			<th>Utilization</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{day}}</td>
+			<td>{{util}}</td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

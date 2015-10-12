@@ -1,0 +1,19 @@
+<div id="text">Pending exam requests:</div>
+<div id="content">
+	<table id="data">
+		<tr>
+			<th>Class</th>
+			<th>Start Time</th>
+			<th>End Time</th>
+			<th>Action</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{class}}</td>
+			<td>{{start}}</td>
+			<td>{{end}}</td>
+			<td><a href="{{approve}}">Approve</a> / <a href="{{deny}}">Deny</a></td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

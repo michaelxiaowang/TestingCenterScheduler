@@ -1,0 +1,21 @@
+<div id="text">Currently scheduled appointments:</div>
+<div id="content">
+	<table id="data">
+		<tr>
+			<th>Class</th>
+			<th>Student</th>
+			<th>Date</th>
+			<th>Time</th>
+			<th>Action</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{class}}</td>
+			<td>{{student}}</td>
+			<td>{{date}}</td>
+			<td>{{time}}</td>
+			<td><a href="{{cancel}}">Cancel</a> / <a href="{{modify}}">Modify</a></td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

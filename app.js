@@ -8,11 +8,20 @@ var passportLocal = require('passport-local');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressSession = require('express-session');
+var hbs = require('hbs');
 
 var app = express();
 
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use('/img', express.static('img'));
+
+hbs.registerPartials(__dirname + '/views/partials');
+hbs.registerHelper("alt", function(index_count,block) {
+	if(parseInt(index_count)%2 === 1)
+		return block.fn(this);
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

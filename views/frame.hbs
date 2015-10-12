@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>{{title}}</title>
+	<link href='https://fonts.googleapis.com/css?family=Old+Standard+TT:700' rel='stylesheet' type='text/css'>
+	<style>
+		#header {
+			background-color:#990000;
+			color:white;
+			height:100px;
+			position:absolute;
+			top:0px;
+			left:0px;
+			right:0px;
+			font-family: 'Old Standard TT', serif;
+		}
+		#title {
+			position:absolute;
+			left:0px;
+			top:0px;
+			text-align:left;
+			font-size:72px;
+		}
+		#controls {
+			position:absolute;
+			right:4px;
+			bottom:4px;
+			text-align:right;
+			font-size:28px;
+		}
+		#sidebar {
+			line-height:30px;
+			background-color:#990000;
+			position:absolute;
+			width:250px;
+			padding:5px; 
+			top:100px;
+			left:0px;
+			bottom:25px;
+			overflow:auto;
+		}
+		a:link {
+			text-decoration: none;
+		}
+		.sidelink {
+			border-top: 4px solid #FFFFFF;
+			background-color:#990000;
+			text-align:center;
+			height:50px;
+			color:white;
+			font-size:28px;
+			font-family: 'Old Standard TT', serif;
+		}
+		.sidelink:hover {
+			background-color:#FF0000;
+		}
+		.sidelink:active {
+			margin:4px;
+		}
+		#page {
+			position:absolute;
+			left:250px;
+			top:100px;
+			right:0px;
+			bottom:25px;
+			padding:10px;
+			margin:16px;
+			background-image: url("/img/logo.png");
+			background-repeat: no-repeat;
+			background-position: right bottom;
+		}
+		#text {
+			position:static;
+			color:black;
+			font-size:28px;
+			font-family: 'Old Standard TT', serif;
+		}
+		#content {
+			position:static;
+			font-family: 'Old Standard TT', serif;
+		}
+		#form {
+			display:block;
+			margin:0;
+			padding:0;
+		}
+		#form td {
+			font-size: 22px;
+			border: 0px;
+			padding: 4px;
+		}
+		.form {
+			display:block;
+			margin:0;
+			padding:0;
+		}
+		.form td {
+			font-size: 22px;
+			border: 0px;
+			padding: 4px;
+		}
+		.left {
+			text-align:right;
+			width:400px;
+		}
+		.right {
+			text-align:left;
+		}
+		.action {
+			text-align: right;
+		}
+		#data {
+			width:100%;
+			border-collapse: collapse;
+		}
+		#data td, #data th {
+			font-size: 16px;
+			border: 2px solid #990000;
+			padding: 4px;
+		}
+		#data th {
+			font-size: 18px;
+			text-align: left;
+			padding: 4px;
+			background-color: #990000;
+			color: white;
+		}
+		#data tr.alt td {
+			background-color: #EEEEEE;
+			color: black;
+		}
+		#footer {
+			background-color:black;
+			color:white;
+			clear:both;
+			text-align:center;
+			padding:5px;
+			position:absolute;
+			left:0px;
+			right:0px;
+			bottom:0px;
+			height:25px;
+		}
+	</style>
+</head>
+
+<body{{#if result}} onload="alert('{{result}}')"{{/if}}>
+	<div id="header">
+		<div id="title">{{title}}</div>
+		<div id="controls"><a href="/logout">[Logout]</a></div>
+	</div>
+	<div id="sidebar">
+		{{#each sidelink}}
+			<a href="{{link}}"><div class="sidelink">{{name}}</div></a>
+		{{/each}}
+	</div>
+	<div id="page">
+		{{> (lookup . 'partial') }}
+	</div>
+	<div id="footer">
+		Copyright © Stony Brook University
+	</div>
+</body>
+
+</html>

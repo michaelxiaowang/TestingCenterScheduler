@@ -1,0 +1,26 @@
+<div id="text">Check-in a student:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+			StudentID:
+			<input name="studentid" type="text">
+			<input type="submit" value="Search">
+		</tr>
+	</table>
+	</form>
+	<table id="data">
+		<tr>
+			<th>Class</th>
+			<th>Date</th>
+			<th>Time</th>
+			<th>Action</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{class}}</td>
+			<td>{{date}}</td>
+			<td>{{time}}</td>
+			<td><a href="{{confirm}}">Confirm</a></td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

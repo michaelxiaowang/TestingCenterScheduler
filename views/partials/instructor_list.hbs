@@ -1,0 +1,25 @@
+<div id="text">List of requested exams:</div>
+<div id="content">
+	<table id="data">
+		<tr>
+			<th>Exam Info</th>
+			<th>Start Time</th>
+			<th>End Time</th>
+			<th>Status</th>
+			<th>Scheduled</th>
+			<th>Taken</th>
+			<th>Action</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{exam}}</td>
+			<td>{{start}}</td>
+			<td>{{end}}</td>
+			<td>{{status}}</td>
+			<td>{{scheduled}}</td>
+			<td>{{taken}}</td>
+			<td><a href="{{cancel}}">Cancel</a></td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

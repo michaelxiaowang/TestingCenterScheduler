@@ -1,0 +1,38 @@
+<div id="text">Basic testing center information:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+	<table id="form">
+		<tr>
+			<td class="left">Number of Seats:</td>
+			<td class="right">
+				<input type="number" name="seats" value="{{seats}}"> seats
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Set-Aside Seats:</td>
+			<td class="right">
+				<input type="number" name="sas" value="{{sas}}"> seats
+			</td>
+		</tr>
+		<!-- todo: Hours -->
+		<tr>
+			<td class="left">Gap Time:</td>
+			<td class="right">
+				<input type="number" name="gap" value="{{gap}}" min="0" max="30"> minutes
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Reminder Interval:</td>
+			<td class="right">
+				<input type="number" name="reminder" value="{{reminder}}" min="0"> minutes
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="action">
+				<input type="submit" value="Submit">
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

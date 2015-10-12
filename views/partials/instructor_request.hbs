@@ -1,0 +1,138 @@
+<div id="text">Make a request to schedule an exam:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+	<table id="form">
+		<tr>
+			<td class="left">Start:</td>
+			<td class="right">
+				<select name="start_month">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="start_day" value="1" min="1" max="31">
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="right">at 
+				<input type="number" name="start_hour" value="12" min="1" max="12">
+				<input type="number" name="start_minute" value="0" min="0" max="59">
+				<select name="start_ampm">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left">End:</td>
+			<td class="right">
+				<select name="end_month">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="end_day" value="1" min="1" max="31">
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="right">at 
+				<input type="number" name="end_hour" value="12" min="1" max="12">
+				<input type="number" name="end_minute" value="0" min="0" max="59">
+				<select name="end_ampm">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Duration:</td>
+			<td class="right">
+				<input type="number" name="duration" value="0"> minutes
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Type:</td>
+			<td class="right">
+				<select name="type" onchange="if (this.value == 'course') { document.getElementById('course').style.display='inline'; document.getElementById('ad-hoc').style.display='none'; } else { document.getElementById('course').style.display='none'; document.getElementById('ad-hoc').style.display='inline'; }">
+					<option value="course" selected>Course</option>
+					<option value="ad-hoc">Ad-Hoc</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	<table id="course" class="form">
+		<tr>
+			<td class="left">Course:</td>
+			<td class="right">
+				<select name="course">
+					{{#each courses}}
+						<option value="{{value}}">{{name}}</option>
+					{{/each}}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Term:</td>
+			<td class="right">
+				<select name="term">
+					{{#each terms}}
+						<option value="{{value}}">{{name}}</option>
+					{{/each}}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="action">
+				<input type="submit" value="Request">
+			</td>
+		</tr>
+	</table>
+	<table id="ad-hoc" style="display:none" class="form">
+		<tr>
+			<td class="left">Exam Name:</td>
+			<td class="right">
+				<input type="text" name="name">
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Students:</td>
+			<td class="right">
+				(format: NetID, LastName, FirstName)
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="right">
+				<textarea name="students" rows="10" cols="50">jdoe, Doe, John</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="action">
+				<input type="submit" value="Request">
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

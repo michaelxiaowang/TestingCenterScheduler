@@ -1,0 +1,23 @@
+<div id="text">Cancel a pending exam request:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+	<table id="form">
+		<tr>
+			<td class="left">Exam:</td>
+			<td class="right">
+				<select name="exam">
+					{{#each exams}}
+						<option value="{{value}}"{{#if selected}} selected{{/if}}>{{name}}</option>
+					{{/each}}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left"></td>
+			<td class="action">
+				<input type="submit" value="Cancel">
+			</td>
+		</tr>
+	</table>
+	</form>
+</div>

@@ -1,0 +1,27 @@
+<div id="text">Appointment and attendance details:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+		Exam:<select name="exam">
+			{{#each exams}}
+				<option value="{{value}}">{{name}}</option>
+			{{/each}}
+		</select>
+		<input type="submit" value="View">
+	</form>
+	<table id="data">
+		<tr>
+			<th>Student</th>
+			<th>Appointment Time</th>
+			<th>Assigned Seat</th>
+			<th>Present for Appointment</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{student}}</td>
+			<td>{{time}}</td>
+			<td>{{seat}}</td>
+			<td>{{present}}</td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

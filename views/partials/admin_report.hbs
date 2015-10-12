@@ -1,0 +1,81 @@
+<div id="text">Generate a report:</div>
+<div id="content">
+	<form action="{{action}}" method="post">
+		Type: <select name="type" onchange="if (this.value == 'range') document.getElementById('end').style.display='inline'; else document.getElementById('end').style.display='none';">
+			<option value="day">Day</option>
+			<option value="week">Week</option>
+			<option value="term">Term</option>
+			<option value="range">Range</option>
+		</select>
+		Start: <select name="start">
+			{{#each terms}}
+				<option value="{{value}}">{{name}}</option>
+			{{/each}}
+		</select>
+		<div style="display:none" id="end">
+			End: <select name="end">
+				{{#each terms}}
+					<option value="{{value}}">{{name}}</option>
+				{{/each}}
+			</select>
+		</div>
+		<input type="submit" name="generate" value="Generate">
+		<input type="submit" name="export" value="Export">
+	</form>
+	{{#if day}}
+	<table id="data">
+		<tr>
+			<th>Day</th>
+			<th>Appointments</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{day}}</td>
+			<td>{{appts}}</td>
+		</tr>
+		{{/each}}
+	</table>
+	{{/if}}
+	{{#if week}}
+	<table id="data">
+		<tr>
+			<th>Week</th>
+			<th>Appointments</th>
+			<th>Courses</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{week}}</td>
+			<td>{{appts}}</td>
+			<td>{{courses}}</td>
+		</tr>
+		{{/each}}
+	</table>
+	{{/if}}
+	{{#if term}}
+	<table id="data">
+		<tr>
+			<th>Course</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{course}}</td>
+		</tr>
+		{{/each}}
+	</table>
+	{{/if}}
+	{{#if range}}
+	<table id="data">
+		<tr>
+			<th>Term</th>
+			<th>Appointments</th>
+		</tr>
+		{{#each data}}
+		<tr{{#alt @index}} class="alt"{{/alt}}>
+			<td>{{term}}</td>
+			<td>{{appts}}</td>
+		</tr>
+		{{/each}}
+	</table>
+	{{/if}}
+</div>
