@@ -10,6 +10,10 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var hbs = require('hbs');
 
+//require db
+var db = require('./db');
+var userdb = db.collection('userdb');
+
 var app = express();
 
 app.set('view engine', 'hbs');
@@ -35,15 +39,17 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.serializeUser(function(user, done) {
-	done(null, user.id);
+	done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done) {
-	done(null, {id: id, username: id, usertype: id});
+		userdb.findOne({_id: new require('mongodb').ObjectID(id)}, function(err, user) {
+	    done(err, user);
+	});
 });
 
 //routes
-require(path.join(__dirname, 'routes'))(app);
+require(path.join(__dirname, 'routes'))(app, fs);
 
 //create a secure server with https and pass our credentials
 var server = https.createServer({
