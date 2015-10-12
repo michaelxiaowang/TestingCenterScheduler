@@ -10,9 +10,9 @@ var appointmentdb = db.collection('appointmentdb');
 
 exports.upload = function(req, res) {
 	//check to see if file type is correct
-	if(req.file.mimetype != 'text/csv') {
+	//if(req.file.mimetype != 'text/csv') {
 		console.log("not a valid csv file")
-	} else {
+	//} else {
 		var stream = fs.createReadStream(req.file.path);
 		/*We check for file name here instead of in .on('data') so there is one check rather
 		than one for every row in the .csv file*/
@@ -41,7 +41,7 @@ exports.upload = function(req, res) {
 			         console.log("done");
 		    });
 		} else {console.log('not user.csv')}
-	}
+	//}
 	
 	//removed the uploaded file
 	fs.unlink(req.file.path);

@@ -1,10 +1,10 @@
 <div id="text">Import data from a file:</div>
 <div id="content">
-	<form action="{{action}}" method="post">
+	<form action="{{action}}" method="post" enctype="multipart/form-data">
 	<table id="form">
 		<tr>
 			<td class="left">File:</td>
-			<td class="right"><input name="file" type="file"></td>
+			<td class="right"><input name="csvfile" type="file" size="50"></td>
 		</tr>
 		<tr>
 			<td class="left"></td>

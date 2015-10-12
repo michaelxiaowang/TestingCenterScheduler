@@ -78,7 +78,6 @@ module.exports = function(app, fs) {
 	//homepage redirects user to login if not logged in
 	app.get('/', function(req, res) {
 		if(req.isAuthenticated()) {
-			console.log(req.user);
 			res.redirect('/' + req.user.Type);
 		} else {
 			res.redirect('/login');
@@ -118,8 +117,8 @@ module.exports = function(app, fs) {
 	app.get('/student/:value', function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "student") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "student") {
+			res.redirect('/' + req.user.Type);
 		} else if(!student[req.params.value]) {
 			res.redirect('/student/list');
 		} else {
@@ -142,8 +141,8 @@ module.exports = function(app, fs) {
 	app.post('/student/:value', function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "student") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "student") {
+			res.redirect('/' + req.user.Type);
 		} else if(!student[req.params.value]) {
 			res.redirect('/student/list');
 		} else {
@@ -189,8 +188,8 @@ module.exports = function(app, fs) {
 	app.get('/instructor/:value', function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "instructor") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "instructor") {
+			res.redirect('/' + req.user.Type);
 		} else if(!instructor[req.params.value]) {
 			res.redirect('/instructor/list');
 		} else {
@@ -213,8 +212,8 @@ module.exports = function(app, fs) {
 	app.post('/instructor/:value', function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "instructor") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "instructor") {
+			res.redirect('/' + req.user.Type);
 		} else if(!instructor[req.params.value]) {
 			res.redirect('/instructor/list');
 		} else {
@@ -275,8 +274,8 @@ module.exports = function(app, fs) {
 	app.get('/admin/:value', function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "admin") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "admin") {
+			res.redirect('/' + req.user.Type);
 		} else if(!admin[req.params.value]) {
 			res.redirect('/admin/list');
 		} else {
@@ -291,11 +290,11 @@ module.exports = function(app, fs) {
 		}
 	});
 
-	app.post('/admin/:value', function(req, res) {
+	app.post('/admin/:value', upload.single('csvfile'), function(req, res) {
 		if(!req.isAuthenticated()) {
 			res.redirect('/login');
-		} else if(req.user.usertype != "admin") {
-			res.redirect('/' + req.user.usertype);
+		} else if(req.user.Type != "admin") {
+			res.redirect('/' + req.user.Type);
 		} else if(!admin[req.params.value]) {
 			res.redirect('/admin/list');
 		} else {
@@ -327,8 +326,8 @@ module.exports = function(app, fs) {
 					];
 				break;
 				case "import":
-					var file 	= req.body.file;
-					//do something with this
+					IM.upload(req, res);
+					console.log(req.file);
 					args.result = "Success?"; //display result to user
 				break;
 				case "info":

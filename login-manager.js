@@ -10,6 +10,7 @@ var userdb = db.collection('userdb');
 and that user's PasswordHash is equal to password*/
 passport.use(new passportLocal.Strategy(
 	function(username, password, done) {
+		console.log(username);
 	    userdb.findOne({ NetID: username }, function (err, user) {
 	      if (err) { return done(err); }
 	      if (!user) {
