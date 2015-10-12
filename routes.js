@@ -411,7 +411,7 @@ module.exports = function(app, fs) {
 			res.render('import');
 		}
 	});
-
+	
 	app.post('/import', upload.single('csvfile'), function(req, res) {
 		if(!req.isAuthenticated() || req.user.Type !='admin') {
 			res.redirect('/');
