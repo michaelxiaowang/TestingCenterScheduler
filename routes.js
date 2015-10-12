@@ -89,8 +89,14 @@ module.exports = function(app, fs) {
 		if(req.isAuthenticated()) {
 			res.redirect('/');
 		} else {
-			res.render('login');
-		}	
+			var args = {
+				name: "",
+				sidelink: {},
+				title: "Login",
+				partial: "login",
+			};
+			res.render('frame', args);
+		}
 	});
 
 	app.post('/login', function(req, res, next) {
@@ -127,6 +133,7 @@ module.exports = function(app, fs) {
 				sidelink: student,
 				title: student[req.params.value].name,
 				partial: "student_" + req.params.value,
+				logout: true,
 			};
 			makeArgsStudent(req.params.value, args);
 			if (req.params.value == "cancel") {
@@ -151,6 +158,7 @@ module.exports = function(app, fs) {
 				sidelink: student,
 				title: student[req.params.value].name,
 				partial: "student_" + req.params.value,
+				logout: true,
 			};
 			switch(req.params.value) {
 				case "add":
@@ -198,6 +206,7 @@ module.exports = function(app, fs) {
 				sidelink: instructor,
 				title: instructor[req.params.value].name,
 				partial: "instructor_" + req.params.value,
+				logout: true,
 			};
 			makeArgsInstructor(req.params.value, args);
 			if (req.params.value == "cancel") {
@@ -222,6 +231,7 @@ module.exports = function(app, fs) {
 				sidelink: instructor,
 				title: instructor[req.params.value].name,
 				partial: "instructor_" + req.params.value,
+				logout: true,
 			};
 			switch(req.params.value) {
 				case "attendance":
@@ -284,6 +294,7 @@ module.exports = function(app, fs) {
 				sidelink: admin,
 				title: admin[req.params.value].name,
 				partial: "admin_" + req.params.value,
+				logout: true,
 			};
 			makeArgsAdmin(req.params.value, args);
 			res.render('frame', args);
@@ -303,6 +314,7 @@ module.exports = function(app, fs) {
 				sidelink: admin,
 				title: admin[req.params.value].name,
 				partial: "admin_" + req.params.value,
+				logout: true,
 			};
 			switch(req.params.value) {
 				case "add":
