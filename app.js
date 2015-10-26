@@ -10,9 +10,11 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var hbs = require('hbs');
 
+var log = require("./logger").LOG;
+
 //require db
 var db = require('./db');
-var userdb = db.collection('userdb');
+var users = db.collection('users');
 
 var app = express();
 
@@ -43,7 +45,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-		userdb.findOne({_id: new require('mongodb').ObjectID(id)}, function(err, user) {
+		users.findOne({_id: new require('mongodb').ObjectID(id)}, function(err, user) {
 	    done(err, user);
 	});
 });
@@ -62,3 +64,5 @@ var port = process.env.PORT || 3000;
 server.listen(port, function() {
 	console.log("Listening on https://127.0.0.1:" + port);
 });
+
+console.log("Listening on port " + port);

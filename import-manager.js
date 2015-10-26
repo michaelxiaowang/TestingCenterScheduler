@@ -4,16 +4,18 @@ var csv = require('fast-csv');
 
 //require db
 var db = require('./db');
-var userdb = db.collection('userdb');
-var classdb = db.collection('classdb');
-var appointmentdb = db.collection('appointmentdb');
+var users = db.collection('users');
+var classes = db.collection('classes');
+var appointments = db.collection('appointments');
+
+var log = require("./logger").LOG;
 
 exports.upload = function(req, res) {
 	//check to see if file type is correct
-	//if(req.file.mimetype != 'text/csv') {
-		console.log("not a valid csv file")
-	//} else {
+	if(req.file.mimetype != 'text/csv') {
+	} else {
 		var stream = fs.createReadStream(req.file.path);
+		
 		/*We check for file name here instead of in .on('data') so there is one check rather
 		than one for every row in the .csv file*/
 		if(req.file.originalname == "user.csv") {
@@ -24,7 +26,7 @@ exports.upload = function(req, res) {
 				})
 			    .on("data", function(data){
 			    	//update if user's email is already in db, else insert user
-			        userdb.update({
+			        users.update({
 			        	Email: data.Email
 			        },{
 			        	FirstName: data.FirstName,
@@ -32,7 +34,7 @@ exports.upload = function(req, res) {
 			        	NetID: data.NetID,
 			        	Email: data.Email,
 			        	PasswordHash: data.NetID,
-			        	Type: 'Student'
+			        	Type: 'student'
 			        },{
 			         	upsert: true
 			        });
@@ -40,9 +42,51 @@ exports.upload = function(req, res) {
 			    .on("end", function(){
 			         console.log("done");
 		    });
-		} else {console.log('not user.csv')}
-	//}
+		} else if(req.file.originalname == "class.csv") {
+			var csvStream = csv
+				.fromStream(stream, {
+					headers : true,
+					discardUnmappedColumns: true
+				})
+			    .on("data", function(data){
+			        classes.update({
+			        	ClassID : data.ClassID
+			        },{
+			        	ClassID : data.ClassID,
+			        	Class: data.Subject + data.CatalogNumber + '-' + data.Section,
+			        	Term: data.ClassID.substring(data.ClassID.indexOf('-')+1), //Extract the term which appears after the '-' character
+
+			        	
+			        },{
+			        	"$pushAll": {"Instructors": [data.InstructorNetID]},
+			        },{
+			         	upsert: true
+			        });
+			    })
+			    .on("end", function(){
+			         console.log("done");
+		    });
+		} else if(req.file.originalname == "roster.csv") {
+			var csvStream = csv
+				.fromStream(stream, {
+					headers : true,
+					discardUnmappedColumns: true
+				})
+			    .on("data", function(data){
+			        classes.update({
+			        	ClassID : data.ClassID
+			        },{
+			        	"$pushAll": {"Roster": [data.NetID]}
+			        },{
+			         	upsert: true
+			        });
+			    })
+			    .on("end", function(){
+			         console.log("done");
+		    });
+		}
+	}
 	
-	//removed the uploaded file
+	//removed the uploaded file from temp/
 	fs.unlink(req.file.path);
 };

@@ -5,6 +5,8 @@ var upload = multer({dest: "temp/"});
 var LM = require(path.join(__dirname, 'login-manager'));
 var IM = require(path.join(__dirname, 'import-manager'));
 
+var log = require("./logger").LOG;
+
 var admin = {
 	info:{
 		name: "Edit Info",
@@ -84,7 +86,7 @@ module.exports = function(app, fs) {
 		}
 	});
 
-	//login page
+	//login page redirects to root when authenticated
 	app.get('/login', function(req, res) {
 		if(req.isAuthenticated()) {
 			res.redirect('/');
@@ -413,23 +415,10 @@ module.exports = function(app, fs) {
 		req.logout();
 		res.redirect('/login')
 	});
-	
-	//import data page
-	app.get('/import', function(req, res) {
-		if(!req.isAuthenticated() || req.user.Type!='admin') {
-			res.redirect('/');
-		} else {
-			res.render('import');
-		}
-	});
-	
-	app.post('/import', upload.single('csvfile'), function(req, res) {
-		if(!req.isAuthenticated() || req.user.Type !='admin') {
-			res.redirect('/');
-		} else {
-			IM.upload(req, res);
-			res.redirect('/admin');
-		}
+
+	//If every other route fails come to this one
+	app.get('/*', function(req, res) {
+		res.redirect('/');
 	});
 };
 
