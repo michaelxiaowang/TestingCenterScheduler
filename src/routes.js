@@ -4,8 +4,10 @@ var upload = multer({dest: "temp/"});
 
 var LM = require(path.join(__dirname, 'login-manager'));
 var IM = require(path.join(__dirname, 'import-manager'));
+var TM = require(path.join(__dirname, 'testingcenter-manager'));
+var EM = require(path.join(__dirname, 'exam-manager'));
 
-var log = require("./logger").LOG;
+var log = require("./../logger").LOG;
 
 var admin = {
 	info:{
@@ -345,11 +347,13 @@ module.exports = function(app, fs) {
 					args.result = uploadStatus; //display result to user
 				break;
 				case "info":
+					var term 	= req.body.term;
 					var seats 	= req.body.seats;
 					var sas		= req.body.sas; //set-aside seats
 					var gap		= req.body.gap;
 					var reminder= req.body.reminder; //interval
 					//do something with these
+					TM.updateTCInfo(req);
 					args.result = "Saved?"; //display result to user
 				break;
 				case "report":

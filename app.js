@@ -13,7 +13,7 @@ var hbs = require('hbs');
 var log = require("./logger").LOG;
 
 //require db
-var db = require('./db');
+var db = require('./src/db');
 var users = db.collection('users');
 
 var app = express();
@@ -51,7 +51,7 @@ passport.deserializeUser(function(id, done) {
 });
 
 //routes
-require(path.join(__dirname, 'routes'))(app, fs);
+require(path.join(__dirname, '/src/routes'))(app, fs);
 
 //create a secure server with https and pass our credentials
 var server = https.createServer({
