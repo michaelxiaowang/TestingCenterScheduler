@@ -6,13 +6,19 @@ var csv = require('fast-csv');
 var db = require('./db');
 var users = db.collection('users');
 var classes = db.collection('classes');
-var appointments = db.collection('appointments');
+var roster = db.collection('roster');
+var appointments = db.collection('appointments'); //used to update superfluous appointments
 
 var log = require("./logger").LOG;
 
 exports.upload = function(req, res) {
-	//check to see if file type is correct
+	//if no file is selected, req.file is null, we will inform the user
+	if(req.file == null) {
+		return "No file was selected.";
+	}
+	//checks to see if file is not a csv file
 	if(req.file.mimetype != 'text/csv') {
+		return "Not a valid csv file."
 	} else {
 		var stream = fs.createReadStream(req.file.path);
 		
@@ -40,8 +46,8 @@ exports.upload = function(req, res) {
 			        });
 			    })
 			    .on("end", function(){
-			         console.log("done");
-		    });
+			         return "Upload completed.";
+		    	});
 		} else if(req.file.originalname == "class.csv") {
 			var csvStream = csv
 				.fromStream(stream, {
@@ -49,23 +55,20 @@ exports.upload = function(req, res) {
 					discardUnmappedColumns: true
 				})
 			    .on("data", function(data){
-			        classes.update({
+			    	classes.update({
 			        	ClassID : data.ClassID
 			        },{
 			        	ClassID : data.ClassID,
 			        	Class: data.Subject + data.CatalogNumber + '-' + data.Section,
 			        	Term: data.ClassID.substring(data.ClassID.indexOf('-')+1), //Extract the term which appears after the '-' character
-
-			        	
-			        },{
-			        	"$pushAll": {"Instructors": [data.InstructorNetID]},
+			        	Instructors: [data.InstructorNetID]
 			        },{
 			         	upsert: true
 			        });
 			    })
 			    .on("end", function(){
-			         console.log("done");
-		    });
+			         return "Upload completed.";
+		    	});
 		} else if(req.file.originalname == "roster.csv") {
 			var csvStream = csv
 				.fromStream(stream, {
@@ -73,20 +76,21 @@ exports.upload = function(req, res) {
 					discardUnmappedColumns: true
 				})
 			    .on("data", function(data){
-			        classes.update({
+			        roster.update({
 			        	ClassID : data.ClassID
 			        },{
-			        	"$pushAll": {"Roster": [data.NetID]}
+			        	"$addToSet": {"Roster": data.NetID}
 			        },{
 			         	upsert: true
 			        });
 			    })
 			    .on("end", function(){
-			         console.log("done");
-		    });
+			         return "Upload completed.";
+		    	});
+		} else {
+			return "Only accepts csv files with name 'user.csv', 'class.csv', or 'roster.csv'.";
 		}
 	}
 	
-	//removed the uploaded file from temp/
-	fs.unlink(req.file.path);
+	fs.unlink(req.file.path); //remove the uploaded file from temp/
 };

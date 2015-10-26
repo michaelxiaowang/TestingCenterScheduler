@@ -340,9 +340,9 @@ module.exports = function(app, fs) {
 					];
 				break;
 				case "import":
-					IM.upload(req, res);
+					var uploadStatus = IM.upload(req, res);
 					console.log(req.file);
-					args.result = "Success?"; //display result to user
+					args.result = uploadStatus; //display result to user
 				break;
 				case "info":
 					var seats 	= req.body.seats;
