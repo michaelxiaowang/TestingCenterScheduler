@@ -6,8 +6,6 @@ var passportLocal = require('passport-local');
 var db = require('./db');
 var users = db.collection('users');
 
-var log = require("./../logger").LOG;
-
 /*Strategy used by passport. Checks to see if there is a user with NetID with value username 
 and that user's PasswordHash is equal to password*/
 passport.use(new passportLocal.Strategy(

@@ -1,82 +1,17 @@
+//require node modules
 var path = require('path');
 var multer = require('multer');
 var upload = multer({dest: "temp/"});
 
+//require view managers
+var DD = require(path.join(__dirname, '../views/datadisplay'));
+var NB = require(path.join(__dirname, '../views/navigationbar'));
+
+//require application logic managers
 var LM = require(path.join(__dirname, 'login-manager'));
 var IM = require(path.join(__dirname, 'import-manager'));
 var TM = require(path.join(__dirname, 'testingcenter-manager'));
 var EM = require(path.join(__dirname, 'exam-manager'));
-
-var log = require("./../logger").LOG;
-
-var admin = {
-	info:{
-		name: "Edit Info",
-		link: "/admin/info"
-	},
-	import:{
-		name: "Import Data",
-		link: "/admin/import"
-	},
-	util:{
-		name: "Display Utilization",
-		link: "/admin/util"
-	},
-	review:{
-		name: "Review Requests",
-		link: "/admin/review"
-	},
-	add:{
-		name: "Add Appointment",
-		link: "/admin/add"
-	},
-	list:{
-		name: "Appointment List",
-		link: "/admin/list"
-	},
-	checkin:{
-		name: "Check-In Student",
-		link: "/admin/checkin"
-	},
-	report:{
-		name: "Generate Report",
-		link: "/admin/report"
-	}
-};
-
-var instructor = {
-	attendance: {
-		name: "See Attendance",
-		link: "/instructor/attendance"
-	},
-	cancel: {
-		name: "Cancel Request",
-		link: "/instructor/cancel"
-	},
-	list: {
-		name: "View All Exams",
-		link: "/instructor/list"
-	},
-	request: {
-		name: "Request Exam",
-		link: "/instructor/request"
-	}
-};
-
-var student = {
-	add: {
-		name: "Add Appointment",
-		link: "/student/add"
-	},
-	cancel: {
-		name: "Cancel Appt.",
-		link: "/student/cancel"
-	},
-	list: {
-		name: "Appointment List",
-		link: "/student/list"
-	}
-};
 
 module.exports = function(app, fs) {
 	//homepage redirects user to login if not logged in
@@ -129,17 +64,17 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "student") {
 			res.redirect('/' + req.user.Type);
-		} else if(!student[req.params.value]) {
+		} else if(!NB.student[req.params.value]) {
 			res.redirect('/student/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: student,
-				title: student[req.params.value].name,
+				sidelink: NB.student,
+				title: NB.student[req.params.value].name,
 				partial: "student_" + req.params.value,
 				logout: true,
 			};
-			makeArgsStudent(req.params.value, args);
+			DD.makeArgsStudent(req.params.value, args);
 			if (req.params.value == "cancel") {
 				if (args.exams[req.query.exam]) {
 					args.exams[req.query.exam].selected = true;
@@ -154,13 +89,13 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "student") {
 			res.redirect('/' + req.user.Type);
-		} else if(!student[req.params.value]) {
+		} else if(!NB.student[req.params.value]) {
 			res.redirect('/student/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: student,
-				title: student[req.params.value].name,
+				sidelink: NB.student,
+				title: NB.student[req.params.value].name,
 				partial: "student_" + req.params.value,
 				logout: true,
 			};
@@ -181,7 +116,7 @@ module.exports = function(app, fs) {
 					args.result = "Success?"; //display result to user
 				break;
 			}
-			makeArgsStudent(req.params.value, args);
+			DD.makeArgsStudent(req.params.value, args);
 			res.render('frame', args);
 		}
 	});
@@ -202,17 +137,17 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "instructor") {
 			res.redirect('/' + req.user.Type);
-		} else if(!instructor[req.params.value]) {
+		} else if(!NB.instructor[req.params.value]) {
 			res.redirect('/instructor/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: instructor,
-				title: instructor[req.params.value].name,
+				sidelink: NB.instructor,
+				title: NB.instructor[req.params.value].name,
 				partial: "instructor_" + req.params.value,
 				logout: true,
 			};
-			makeArgsInstructor(req.params.value, args);
+			DD.makeArgsInstructor(req.params.value, args);
 			if (req.params.value == "cancel") {
 				if (args.exams[req.query.exam]) {
 					args.exams[req.query.exam].selected = true;
@@ -227,13 +162,13 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "instructor") {
 			res.redirect('/' + req.user.Type);
-		} else if(!instructor[req.params.value]) {
+		} else if(!NB.instructor[req.params.value]) {
 			res.redirect('/instructor/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: instructor,
-				title: instructor[req.params.value].name,
+				sidelink: NB.instructor,
+				title: NB.instructor[req.params.value].name,
 				partial: "instructor_" + req.params.value,
 				logout: true,
 			};
@@ -269,7 +204,7 @@ module.exports = function(app, fs) {
 					var students	= req.body.students;//ad-hoc
 				break;
 			}
-			makeArgsInstructor(req.params.value, args);
+			DD.makeArgsInstructor(req.params.value, args);
 			res.render('frame', args);
 		}
 	});
@@ -290,17 +225,17 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "admin") {
 			res.redirect('/' + req.user.Type);
-		} else if(!admin[req.params.value]) {
+		} else if(!NB.admin[req.params.value]) {
 			res.redirect('/admin/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: admin,
-				title: admin[req.params.value].name,
+				sidelink: NB.admin,
+				title: NB.admin[req.params.value].name,
 				partial: "admin_" + req.params.value,
 				logout: true,
 			};
-			makeArgsAdmin(req.params.value, args);
+			DD.makeArgsAdmin(req.params.value, args);
 			res.render('frame', args);
 		}
 	});
@@ -310,13 +245,13 @@ module.exports = function(app, fs) {
 			res.redirect('/login');
 		} else if(req.user.Type != "admin") {
 			res.redirect('/' + req.user.Type);
-		} else if(!admin[req.params.value]) {
+		} else if(!NB.admin[req.params.value]) {
 			res.redirect('/admin/list');
 		} else {
 			var args = {
 				name: req.user.username,
-				sidelink: admin,
-				title: admin[req.params.value].name,
+				sidelink: NB.admin,
+				title: NB.admin[req.params.value].name,
 				partial: "admin_" + req.params.value,
 				logout: true,
 			};
@@ -410,144 +345,19 @@ module.exports = function(app, fs) {
 					];
 				break;
 			}
-			makeArgsAdmin(req.params.value, args);
+			DD.makeArgsAdmin(req.params.value, args);
 			res.render('frame', args);
 		}
 	});
 	
+	//Log the user out and return to login page
 	app.get('/logout', function(req, res) {
 		req.logout();
 		res.redirect('/login')
 	});
 
-	//If every other route fails come to this one
+	//If every other route fails then user is directed back to root
 	app.get('/*', function(req, res) {
 		res.redirect('/');
 	});
 };
-
-function makeArgsAdmin(page, args) {
-	switch(page) {
-		case "info": //Edit Info
-			args.action		= "/admin/info"; //POST action
-			args.seats		= 64; //current setting for # of total seats
-			args.sas		= 8; //current setting for # of set-aside seats
-			//TODO: date range
-			args.gap		= 0; //current setting for gap time
-			args.reminder	= 1440 //current setting for reminder interval
-		break;
-		case "import": //Import Data
-			args.action = "/admin/import"; //POST action
-		break;
-		case "util": //Display Utilization
-			args.action = "/admin/util";
-			args.terms	= [
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-			];
-		break;
-		case "review": //Review Requests
-			args.data = [
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
-			];
-		break;
-		case "add": //Add Appointment
-			args.action = "/admin/add"; //POST action
-			args.courses= [
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-			];
-		break;
-		case "list": //Appointment List
-			args.data	= [
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-			];
-		break;
-		case "checkin": //Check-In Student
-			args.action = "/admin/checkin"; //POST action
-		break;
-		case "report": //Generate Report
-			args.action = "/admin/report"; //POST action
-			args.terms 	= [
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-			];
-		break;
-	}
-}
-
-function makeArgsInstructor(page, args) {
-	switch(page) {
-		case "attendance":
-			args.action = "/instructor/attendance"; //POST action
-			args.exams	= [
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-			];
-		break;
-		case "cancel":
-			args.action = "/instructor/cancel"; //POST action
-			args.exams	= [
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-			];
-		break;
-		case "list":
-			args.data	= [
-				{exam:"exam display name", start:"start display time", end:"end display time", status:"Approved/Denied/Pending", scheduled:"# students scheduled", taken:"# students taken", cancel:"/instructor/cancel?exam=?"},
-				{exam:"exam display name", start:"start display time", end:"end display time", status:"Approved/Denied/Pending", scheduled:"# students scheduled", taken:"# students taken", cancel:"/instructor/cancel?exam=?"},
-				{exam:"exam display name", start:"start display time", end:"end display time", status:"Approved/Denied/Pending", scheduled:"# students scheduled", taken:"# students taken", cancel:"/instructor/cancel?exam=?"},
-			]
-		break;
-		case "request":
-			args.action	= "/instructor/request"; //POST action
-			args.courses= [
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-			];
-			args.terms	= [
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-			];
-		break;
-	}
-}
-
-function makeArgsStudent(page, args) {
-	switch(page) {
-		case "add":
-			args.action = "/student/add"; //POST action
-			args.courses= [
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-			];
-		break;
-		case "cancel":
-			args.action = "/student/cancel"; //POST action
-			args.exams	= [
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-				{name:"exam display name", value:"exam POST value"},
-			];
-		break;
-		case "list":
-			args.data	= [
-				{class:"class display name", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=?"},
-				{class:"class display name", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=?"},
-				{class:"class display name", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=?"},
-			]
-		break;
-	}
-}

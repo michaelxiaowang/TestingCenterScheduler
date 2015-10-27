@@ -9,8 +9,6 @@ var classes = db.collection('classes');
 var roster = db.collection('roster');
 var appointments = db.collection('appointments'); //used to update superfluous appointments
 
-var log = require("./../logger").LOG;
-
 exports.upload = function(req, res) {
 	//if no file is selected, req.file is null, we will inform the user
 	if(req.file == null) {

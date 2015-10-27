@@ -10,8 +10,6 @@ var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var hbs = require('hbs');
 
-var log = require("./logger").LOG;
-
 //require db
 var db = require('./src/db');
 var users = db.collection('users');
