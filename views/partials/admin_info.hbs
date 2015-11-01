@@ -1,11 +1,94 @@
 <div id="text">Basic testing center information:</div>
+<script>
+	var closed_count = 0;
+	var reserved_count = 0;
+	
+	function addClosed() {
+		var template = document.getElementById("closed_template");
+		var clone = template.cloneNode(true);
+		clone.id = "closed_"+closed_count;
+		clone.style.display = "table-row";
+		clone.innerHTML = clone.innerHTML.replace(/X/g, ""+closed_count);
+		var previous = document.getElementById("closed_"+(closed_count-1));
+		if (previous == null) previous = document.getElementById("closed_parent");
+		previous.parentNode.insertBefore(clone, previous.nextSibling);
+		closed_count++;
+	}
+	
+	function delClosed(id) {
+		if (!confirm("Delete this date range?")) return;
+		var toRemove = document.getElementById("closed_"+id);
+		toRemove.parentNode.removeChild(toRemove);
+		for (var i=id+1; i<closed_count; i++) {
+			document.getElementById("closed_"+i).setAttribute("id", "closed_"+(i-1));
+			document.getElementsByName("closed_from_month_"+i)	[0].setAttribute("name", "closed_from_month_"	+(i-1));
+			document.getElementsByName("closed_from_day_"	+i)	[0].setAttribute("name", "closed_from_day_"		+(i-1));
+			document.getElementsByName("closed_to_month_"	+i)	[0].setAttribute("name", "closed_to_month_"		+(i-1));
+			document.getElementsByName("closed_to_day_"	+i)		[0].setAttribute("name", "closed_to_day_"		+(i-1));
+			document.getElementById("delete_"+i).setAttribute("onClick", "delClosed("+(i-1)+")");
+			document.getElementById("delete_"+i).setAttribute("id", "delete_"+(i-1));
+		}
+		closed_count--;
+	}
+	
+	function addReserved() {
+		var previous1 = document.getElementById("reserved2_"+(reserved_count-1));
+		if (previous1 == null) previous1 = document.getElementById("reserved_parent");
+		
+		var template1 = document.getElementById("reserved1_template");
+		var clone1 = template1.cloneNode(true);
+		clone1.id = "reserved1_"+reserved_count;
+		clone1.style.display = "table-row";
+		clone1.innerHTML = clone1.innerHTML.replace(/X/g, ""+reserved_count);
+		previous1.parentNode.insertBefore(clone1, previous1.nextSibling);
+		
+		var template2 = document.getElementById("reserved2_template");
+		var clone2 = template2.cloneNode(true);
+		clone2.id = "reserved2_"+reserved_count;
+		clone2.style.display = "table-row";
+		clone2.innerHTML = clone2.innerHTML.replace(/X/g, ""+reserved_count);
+		clone1.parentNode.insertBefore(clone2, clone1.nextSibling);
+		
+		reserved_count++;
+	}
+	
+	function delReserved(id) {
+		if (!confirm("Delete this time range?")) return;
+		var toRemove1 = document.getElementById("reserved1_"+id);
+		toRemove1.parentNode.removeChild(toRemove1);
+		var toRemove2 = document.getElementById("reserved2_"+id);
+		toRemove2.parentNode.removeChild(toRemove2);
+		for (var i=id+1; i<reserved_count; i++) {
+			document.getElementById("reserved1_"+i).setAttribute("id", "reserved1_"+(i-1));
+			document.getElementsByName("from_month_"+i)	[0].setAttribute("name", "from_month_"	+(i-1));
+			document.getElementsByName("from_day_"	+i)	[0].setAttribute("name", "from_day_"	+(i-1));
+			document.getElementsByName("from_hour_"	+i)	[0].setAttribute("name", "from_hour_"	+(i-1));
+			document.getElementsByName("from_minute_"+i)[0].setAttribute("name", "from_minute_"	+(i-1));
+			document.getElementsByName("from_ampm_"	+i)	[0].setAttribute("name", "from_ampm_"	+(i-1));
+			document.getElementById("delete2_"+i).setAttribute("onClick", "delReserved("+(i-1)+")");
+			document.getElementById("delete2_"+i).setAttribute("id", "delete2_"+(i-1));
+			
+			document.getElementById("reserved2_"+i).setAttribute("id", "reserved2_"+(i-1));
+			document.getElementsByName("to_month_"	+i)	[0].setAttribute("name", "to_month_"	+(i-1));
+			document.getElementsByName("to_day_"	+i)	[0].setAttribute("name", "to_day_"		+(i-1));
+			document.getElementsByName("to_hour_"	+i)	[0].setAttribute("name", "to_hour_"		+(i-1));
+			document.getElementsByName("to_minute_" +i)	[0].setAttribute("name", "to_minute_"	+(i-1));
+			document.getElementsByName("to_ampm_"	+i)	[0].setAttribute("name", "to_ampm_"		+(i-1));
+		}
+		reserved_count--;
+	}
+</script>
 <div id="content">
+	<form action="/admin/info" method="get">
+	Term: <input type="number" name="term" value="{{term}}"> <input type="submit" value="Edit">
+	</form>
+	{{#if term}}
 	<form action="{{action}}" method="post">
 	<table id="form">
 		<tr>
-			<td class="left">Term:</td>
+			<td class="left">Term Name:</td>
 			<td class="right">
-				<input type="number" name="term" value="{{term}}"> term
+				<input type="text" name="termname" value="{{termname}}">
 			</td>
 		</tr>
 		<tr>
@@ -20,7 +103,336 @@
 				<input type="number" name="sas" value="{{sas}}"> seats
 			</td>
 		</tr>
-		<!-- todo: Hours -->
+		<tr>
+			<td class="left">Monday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_mon" value="{{from_hour_mon}}" min="1" max="12"> :
+				<input type="number" name="from_minute_mon" value="{{from_minute_mon}}" min="0" max="59">
+				<select name="from_ampm_mon">
+					<option value="am"{{#equal from_ampm_mon "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_mon "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_mon" value="{{to_hour_mon}}" min="1" max="12"> :
+				<input type="number" name="to_minute_mon" value="{{to_minute_mon}}" min="0" max="59">
+				<select name="to_ampm_mon">
+					<option value="am"{{#equal to_ampm_mon "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_mon "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Tuesday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_tue" value="{{from_hour_tue}}" min="1" max="12"> :
+				<input type="number" name="from_minute_tue" value="{{from_minute_tue}}" min="0" max="59">
+				<select name="from_ampm_tue">
+					<option value="am"{{#equal from_ampm_tue "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_tue "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_tue" value="{{to_hour_tue}}" min="1" max="12"> :
+				<input type="number" name="to_minute_tue" value="{{to_minute_tue}}" min="0" max="59">
+				<select name="to_ampm_tue">
+					<option value="am"{{#equal to_ampm_tue "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_tue "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Wednesday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_wed" value="{{from_hour_wed}}" min="1" max="12"> :
+				<input type="number" name="from_minute_wed" value="{{from_minute_wed}}" min="0" max="59">
+				<select name="from_ampm_wed">
+					<option value="am"{{#equal from_ampm_wed "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_wed "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_wed" value="{{to_hour_wed}}" min="1" max="12"> :
+				<input type="number" name="to_minute_wed" value="{{to_minute_wed}}" min="0" max="59">
+				<select name="to_ampm_wed">
+					<option value="am"{{#equal to_ampm_wed "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_wed "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Thursday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_thu" value="{{from_hour_thu}}" min="1" max="12"> :
+				<input type="number" name="from_minute_thu" value="{{from_minute_thu}}" min="0" max="59">
+				<select name="from_ampm_thu">
+					<option value="am"{{#equal from_ampm_thu "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_thu "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_thu" value="{{to_hour_thu}}" min="1" max="12"> :
+				<input type="number" name="to_minute_thu" value="{{to_minute_thu}}" min="0" max="59">
+				<select name="to_ampm_thu">
+					<option value="am"{{#equal to_ampm_thu "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_thu "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Friday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_fri" value="{{from_hour_fri}}" min="1" max="12"> :
+				<input type="number" name="from_minute_fri" value="{{from_minute_fri}}" min="0" max="59">
+				<select name="from_ampm_fri">
+					<option value="am"{{#equal from_ampm_fri "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_fri "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_fri" value="{{to_hour_fri}}" min="1" max="12"> :
+				<input type="number" name="to_minute_fri" value="{{to_minute_fri}}" min="0" max="59">
+				<select name="to_ampm_fri">
+					<option value="am"{{#equal to_ampm_fri "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_fri "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Saturday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_sat" value="{{from_hour_sat}}" min="1" max="12"> :
+				<input type="number" name="from_minute_sat" value="{{from_minute_sat}}" min="0" max="59">
+				<select name="from_ampm_sat">
+					<option value="am"{{#equal from_ampm_sat "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_sat "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_sat" value="{{to_hour_sat}}" min="1" max="12"> :
+				<input type="number" name="to_minute_sat" value="{{to_minute_sat}}" min="0" max="59">
+				<select name="to_ampm_sat">
+					<option value="am"{{#equal to_ampm_sat "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_sat "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Sunday Hours:</td>
+			<td class="right">
+				<input type="number" name="from_hour_sun" value="{{from_hour_sun}}" min="1" max="12"> :
+				<input type="number" name="from_minute_sun" value="{{from_minute_sun}}" min="0" max="59">
+				<select name="from_ampm_sun">
+					<option value="am"{{#equal from_ampm_sun "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm_sun "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				 to 
+				<input type="number" name="to_hour_sun" value="{{to_hour_sun}}" min="1" max="12"> :
+				<input type="number" name="to_minute_sun" value="{{to_minute_sun}}" min="0" max="59">
+				<select name="to_ampm_sun">
+					<option value="am"{{#equal to_ampm_sun "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm_sun "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<tr id="closed_parent">
+			<td class="left">Closed Periods:</td>
+			<td class="right">
+				<input type="button" value="Add New Closed Period" onClick="addClosed();">
+			</td>
+		</tr>
+		{{#each closed}}
+		<tr id="closed_{{@index}}">
+			<td class="left"></td>
+			<td class="right">
+				<select name="closed_from_month_{{@index}}">
+					<option value="1"{{#equal from_month 1}} selected{{/equal}}>January</option>
+					<option value="2"{{#equal from_month 2}} selected{{/equal}}>February</option>
+					<option value="3"{{#equal from_month 3}} selected{{/equal}}>March</option>
+					<option value="4"{{#equal from_month 4}} selected{{/equal}}>April</option>
+					<option value="5"{{#equal from_month 5}} selected{{/equal}}>May</option>
+					<option value="6"{{#equal from_month 6}} selected{{/equal}}>June</option>
+					<option value="7"{{#equal from_month 7}} selected{{/equal}}>July</option>
+					<option value="8"{{#equal from_month 8}} selected{{/equal}}>August</option>
+					<option value="9"{{#equal from_month 9}} selected{{/equal}}>September</option>
+					<option value="10"{{#equal from_month 10}} selected{{/equal}}>October</option>
+					<option value="11"{{#equal from_month 11}} selected{{/equal}}>November</option>
+					<option value="12"{{#equal from_month 12}} selected{{/equal}}>December</option>
+				</select>
+				<input type="number" name="closed_from_day_{{@index}}" value="{{from_day}}" min="1" max="31">
+				 to 
+				<select name="closed_to_month_{{@index}}">
+					<option value="1"{{#equal to_month 1}} selected{{/equal}}>January</option>
+					<option value="2"{{#equal to_month 2}} selected{{/equal}}>February</option>
+					<option value="3"{{#equal to_month 3}} selected{{/equal}}>March</option>
+					<option value="4"{{#equal to_month 4}} selected{{/equal}}>April</option>
+					<option value="5"{{#equal to_month 5}} selected{{/equal}}>May</option>
+					<option value="6"{{#equal to_month 6}} selected{{/equal}}>June</option>
+					<option value="7"{{#equal to_month 7}} selected{{/equal}}>July</option>
+					<option value="8"{{#equal to_month 8}} selected{{/equal}}>August</option>
+					<option value="9"{{#equal to_month 9}} selected{{/equal}}>September</option>
+					<option value="10"{{#equal to_month 10}} selected{{/equal}}>October</option>
+					<option value="11"{{#equal to_month 11}} selected{{/equal}}>November</option>
+					<option value="12"{{#equal to_month 12}} selected{{/equal}}>December</option>
+				</select>
+				<input type="number" name="closed_to_day_{{@index}}" value="{{to_day}}" min="1" max="31">
+				<input type="button" id="delete_{{@index}}" value="x" onClick="delClosed({{@index}});">
+			</td>
+		</tr>
+		<script> closed_count++; </script>
+		{{/each}}
+		<tr id="closed_template" style="display:none;">
+			<td class="left"></td>
+			<td class="right">
+				<select name="closed_from_month_X">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="closed_from_day_X" value="1" min="1" max="31">
+				 to 
+				<select name="closed_to_month_X">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="closed_to_day_X" value="1" min="1" max="31">
+				<input type="button" id="delete_X" value="x" onClick="delClosed(X);">
+			</td>
+		</tr>
+		<tr id="reserved_parent">
+			<td class="left">Reserved Periods:</td>
+			<td class="right">
+				<input type="button" value="Add New Reserved Period" onClick="addReserved();">
+			</td>
+		</tr>
+		{{#each reserved}}
+		<tr id="reserved1_{{@index}}">
+			<td class="left"></td>
+			<td class="right">
+				<select name="from_month_{{@index}}">
+					<option value="1"{{#equal from_month 1}} selected{{/equal}}>January</option>
+					<option value="2"{{#equal from_month 2}} selected{{/equal}}>February</option>
+					<option value="3"{{#equal from_month 3}} selected{{/equal}}>March</option>
+					<option value="4"{{#equal from_month 4}} selected{{/equal}}>April</option>
+					<option value="5"{{#equal from_month 5}} selected{{/equal}}>May</option>
+					<option value="6"{{#equal from_month 6}} selected{{/equal}}>June</option>
+					<option value="7"{{#equal from_month 7}} selected{{/equal}}>July</option>
+					<option value="8"{{#equal from_month 8}} selected{{/equal}}>August</option>
+					<option value="9"{{#equal from_month 9}} selected{{/equal}}>September</option>
+					<option value="10"{{#equal from_month 10}} selected{{/equal}}>October</option>
+					<option value="11"{{#equal from_month 11}} selected{{/equal}}>November</option>
+					<option value="12"{{#equal from_month 12}} selected{{/equal}}>December</option>
+				</select>
+				<input type="number" name="from_day_{{@index}}" value="{{from_day}}" min="1" max="31">
+				 at 
+				<input type="number" name="from_hour_{{@index}}" value="{{from_hour}}" min="1" max="12"> :
+				<input type="number" name="from_minute_{{@index}}" value="{{from_minute}}" min="0" max="59">
+				<select name="from_ampm_{{@index}}">
+					<option value="am"{{#equal from_ampm "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal from_ampm "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+				<input type="button" id="delete2_{{@index}}" value="x" onClick="delReserved({{@index}});">
+			</td>
+		</tr>
+		<tr id="reserved2_{{@index}}">
+			<td class="left"></td>
+			<td class="right">
+				 to 
+				<select name="to_month_{{@index}}">
+					<option value="1"{{#equal to_month 1}} selected{{/equal}}>January</option>
+					<option value="2"{{#equal to_month 2}} selected{{/equal}}>February</option>
+					<option value="3"{{#equal to_month 3}} selected{{/equal}}>March</option>
+					<option value="4"{{#equal to_month 4}} selected{{/equal}}>April</option>
+					<option value="5"{{#equal to_month 5}} selected{{/equal}}>May</option>
+					<option value="6"{{#equal to_month 6}} selected{{/equal}}>June</option>
+					<option value="7"{{#equal to_month 7}} selected{{/equal}}>July</option>
+					<option value="8"{{#equal to_month 8}} selected{{/equal}}>August</option>
+					<option value="9"{{#equal to_month 9}} selected{{/equal}}>September</option>
+					<option value="10"{{#equal to_month 10}} selected{{/equal}}>October</option>
+					<option value="11"{{#equal to_month 11}} selected{{/equal}}>November</option>
+					<option value="12"{{#equal to_month 12}} selected{{/equal}}>December</option>
+				</select>
+				<input type="number" name="to_day_{{@index}}" value="{{to_day}}" min="1" max="31">
+				 at 
+				<input type="number" name="to_hour_{{@index}}" value="{{to_hour}}" min="1" max="12"> :
+				<input type="number" name="to_minute_{{@index}}" value="{{to_minute}}" min="0" max="59">
+				<select name="to_ampm_{{@index}}">
+					<option value="am"{{#equal to_ampm "am"}} selected{{/equal}}>AM</option>
+					<option value="pm"{{#equal to_ampm "pm"}} selected{{/equal}}>PM</option>
+				</select> 
+			</td>
+		</tr>
+		<script> reserved_count++; </script>
+		{{/each}}
+		<tr id="reserved1_template" style="display:none;">
+			<td class="left"></td>
+			<td class="right">
+				<select name="from_month_X">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="from_day_X" value="1" min="1" max="31">
+				 at 
+				<input type="number" name="from_hour_X" value="12" min="1" max="12"> :
+				<input type="number" name="from_minute_X" value="0" min="0" max="59">
+				<select name="from_ampm_X">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select> 
+				<input type="button" id="delete2_X" value="x" onClick="delReserved(X);">
+			</td>
+		</tr>
+		<tr id="reserved2_template" style="display:none;">
+			<td class="left"></td>
+			<td class="right">
+				 to 
+				<select name="to_month_X">
+					<option value="1">January</option>
+					<option value="2">February</option>
+					<option value="3">March</option>
+					<option value="4">April</option>
+					<option value="5">May</option>
+					<option value="6">June</option>
+					<option value="7">July</option>
+					<option value="8">August</option>
+					<option value="9">September</option>
+					<option value="10">October</option>
+					<option value="11">November</option>
+					<option value="12">December</option>
+				</select>
+				<input type="number" name="to_day_X" value="1" min="1" max="31">
+				 at 
+				<input type="number" name="to_hour_X" value="12" min="1" max="12"> :
+				<input type="number" name="to_minute_X" value="0" min="0" max="59">
+				<select name="to_ampm_X">
+					<option value="am">AM</option>
+					<option value="pm">PM</option>
+				</select> 
+			</td>
+		</tr>
 		<tr>
 			<td class="left">Gap Time:</td>
 			<td class="right">
@@ -41,4 +453,5 @@
 		</tr>
 	</table>
 	</form>
+	{{/if}}
 </div>

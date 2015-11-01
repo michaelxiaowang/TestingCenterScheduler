@@ -9,12 +9,78 @@ var testingcenters = db.collection('testingcenters');
 exports.makeArgsAdmin = function(req, args) {
 	switch(req.params.value) {
 		case "info": //Edit Info
-			args.action		= "/admin/info"; //POST action
-			args.seats		= 64; //current setting for # of total seats
-			args.sas		= 8; //current setting for # of set-aside seats
-			//TODO: date range
-			args.gap		= 0; //current setting for gap time
-			args.reminder	= 1440 //current setting for reminder interval
+			if (req.query.term) {
+				args.term		= req.query.term; //term number
+				args.termname	= "" //term display name
+				args.action		= "/admin/info"; //POST action
+				args.seats		= 64; //current setting for # of total seats
+				args.sas		= 8; //current setting for # of set-aside seats
+				//current setting for testing center hours
+				//monday
+				args.from_hour_mon	= 12;
+				args.from_minute_mon= 0;
+				args.from_ampm_mon	= "am";
+				args.to_hour_mon	= 12;
+				args.to_minute_mon	= 0;
+				args.to_ampm_mon	= "am";
+				//tuesday
+				args.from_hour_tue	= 12;
+				args.from_minute_tue= 0;
+				args.from_ampm_tue	= "am";
+				args.to_hour_tue	= 12;
+				args.to_minute_tue	= 0;
+				args.to_ampm_tue	= "am";
+				//wednesday
+				args.from_hour_wed	= 12;
+				args.from_minute_wed= 0;
+				args.from_ampm_wed	= "am";
+				args.to_hour_wed	= 12;
+				args.to_minute_wed	= 0;
+				args.to_ampm_wed	= "am";
+				//thursday
+				args.from_hour_thu	= 12;
+				args.from_minute_thu= 0;
+				args.from_ampm_thu	= "am";
+				args.to_hour_thu	= 12;
+				args.to_minute_thu	= 0;
+				args.to_ampm_thu	= "am";
+				//friday
+				args.from_hour_fri	= 12;
+				args.from_minute_fri= 0;
+				args.from_ampm_fri	= "am";
+				args.to_hour_fri	= 12;
+				args.to_minute_fri	= 0;
+				args.to_ampm_fri	= "am";
+				//saturday
+				args.from_hour_sat	= 12;
+				args.from_minute_sat= 0;
+				args.from_ampm_sat	= "am";
+				args.to_hour_sat	= 12;
+				args.to_minute_sat	= 0;
+				args.to_ampm_sat	= "am";
+				//sunday
+				args.from_hour_sun	= 12;
+				args.from_minute_sun= 0;
+				args.from_ampm_sun	= "am";
+				args.to_hour_sun	= 12;
+				args.to_minute_sun	= 0;
+				args.to_ampm_sun	= "am";
+				//current setting for closed date ranges
+				args.closed = [
+					{from_month:1, from_day:1, to_month:1, to_day:1},
+					{from_month:1, from_day:1, to_month:1, to_day:1},
+				]
+				//current settings for reserved time ranges
+				args.reserved = [
+					{from_month:1, from_day:1, from_hour:12, from_minute:0, from_ampm:"am", to_month:1, to_day:1, to_hour:12, to_minute:0, to_ampm:"am"},
+					{from_month:1, from_day:1, from_hour:12, from_minute:0, from_ampm:"am", to_month:1, to_day:1, to_hour:12, to_minute:0, to_ampm:"am"},
+				]
+				//TODO: date range
+				args.gap		= 0; //current setting for gap time
+				args.reminder	= 1440; //current setting for reminder interval
+			} else {
+				args.term = 0;
+			}
 		break;
 		case "import": //Import Data
 			args.action = "/admin/import"; //POST action
@@ -28,10 +94,18 @@ exports.makeArgsAdmin = function(req, args) {
 			];
 		break;
 		case "review": //Review Requests
+			if (req.query.approve) {
+				var request = req.query.approve;
+				//approve request
+			}
+			if (req.query.deny) {
+				var request = req.query.deny;
+				//deny request
+			}
 			args.data = [
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
-				{class:"class display name", start:"start date/time", end:"end date/time", approve:"/admin/?", deny:"/admin/?"},
+				{course:"course display name", start:"start date/time", end:"end date/time", approve:"/admin/review?approve=?", deny:"/admin/review?deny=?"},
+				{course:"course display name", start:"start date/time", end:"end date/time", approve:"/admin/review?approve=?", deny:"/admin/review?deny=?"},
+				{course:"course display name", start:"start date/time", end:"end date/time", approve:"/admin/review?approve=?", deny:"/admin/review?deny=?"},
 			];
 		break;
 		case "add": //Add Appointment
@@ -44,9 +118,9 @@ exports.makeArgsAdmin = function(req, args) {
 		break;
 		case "list": //Appointment List
 			args.data	= [
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{class:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
+				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
+				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
+				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
 			];
 		break;
 		case "checkin": //Check-In Student
@@ -62,7 +136,6 @@ exports.makeArgsAdmin = function(req, args) {
 		break;
 	}
 }
-
 //Make the arguments which contain the data to display to instructors
 exports.makeArgsInstructor = function(req, args) {
 	switch(req.params.value) {
@@ -182,7 +255,7 @@ exports.makeArgsStudent = function(req, args, callback) {
 	switch(req.params.value) {
 		case "add":
 			args.action = "/student/add"; //POST action
-			args.courses = [];
+			args.exams = [];
 			//get the roster collection objects into an array
 			roster.find({Roster: [req.user.NetID]}).toArray(function(err, rosterArray) {
 				for(i in rosterArray) {
@@ -190,9 +263,7 @@ exports.makeArgsStudent = function(req, args, callback) {
 					exams.find({ClassID: rosterArray[i].ClassID}).toArray(function(err, examArray) {
 						for(j in examArray) {
 							//push each class with an exam to display to user
-							console.log('hello:' + examArray[j].ClassID);
-							args.courses.push({name: examArray[j].ClassID, value: "course POST value"});
-							console.log('bye:' + examArray[j].ClassID);
+							args.exams.push({name: examArray[j].examID, value: "course POST value"});
 						}
 					});
 				}

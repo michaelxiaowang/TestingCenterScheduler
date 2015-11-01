@@ -26,6 +26,15 @@ hbs.registerHelper("alt", function(index_count,block) {
 	if(parseInt(index_count)%2 === 1)
 		return block.fn(this);
 });
+hbs.registerHelper('equal', function(lvalue, rvalue, options) {
+    if (arguments.length < 3)
+        throw new Error("Handlebars Helper equal needs 2 parameters");
+    if( lvalue!=rvalue ) {
+        return options.inverse(this);
+    } else {
+        return options.fn(this);
+    }
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

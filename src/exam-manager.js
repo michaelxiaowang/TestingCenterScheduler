@@ -3,7 +3,6 @@ var exams = db.collection('exams');
 
 //Create an exam request
 exports.createExam = function(req) {
-	//var duration	= req.body.duration;
 	var students	= req.body.students;//ad-hoc
 	var adhoc = (req.body.type == "ad-hoc");
 	if(!adhoc) {
@@ -25,6 +24,7 @@ exports.createExam = function(req) {
 	if(req.body.end_ampm == 'pm') {
 		endTime += 43200000;
 	}
+	var duration = req.body.duration * 60000;
 	exams.insert({
 		"ClassID": ClassID,
 		"examID": ClassID,
@@ -34,6 +34,7 @@ exports.createExam = function(req) {
 		"startDate": startDate,
 		"endTime": endTime,
 		"endDate": endDate,
+		"duration": duration,
 		"adhoc": adhoc,
 		"status": "pending"
 	});
