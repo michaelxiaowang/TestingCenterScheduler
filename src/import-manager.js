@@ -63,6 +63,19 @@ exports.upload = function(req, res) {
 			        },{
 			         	upsert: true
 			        });
+			        //Create a instructor user
+			        users.update({
+			        	Email: data.InstructorNetID
+			        },{
+			        	FirstName: data.InstructorNetID,
+			        	LastName: data.InstructorNetID,
+			        	NetID: data.InstructorNetID,
+			        	Email: data.Email + "@example.com",
+			        	PasswordHash: data.InstructorNetID,
+			        	Type: 'instructor'
+			        },{
+			         	upsert: true
+			        });
 			    })
 			    .on("end", function(){
 			         return "Upload completed.";

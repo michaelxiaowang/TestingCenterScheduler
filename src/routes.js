@@ -74,13 +74,15 @@ module.exports = function(app, fs) {
 				partial: "student_" + req.params.value,
 				logout: true,
 			};
-			DD.makeArgsStudent(req.params.value, args);
-			if (req.params.value == "cancel") {
+			DD.makeArgsStudent(req, args, function(args) {
+				res.render('frame', args);
+				if (req.params.value == "cancel") {
 				if (args.exams[req.query.exam]) {
 					args.exams[req.query.exam].selected = true;
 				}
 			}
-			res.render('frame', args);
+			});
+			
 		}
 	})
 
@@ -116,7 +118,7 @@ module.exports = function(app, fs) {
 					args.result = "Success?"; //display result to user
 				break;
 			}
-			DD.makeArgsStudent(req.params.value, args);
+			DD.makeArgsStudent(req, args);
 			res.render('frame', args);
 		}
 	});
@@ -147,7 +149,7 @@ module.exports = function(app, fs) {
 				partial: "instructor_" + req.params.value,
 				logout: true,
 			};
-			DD.makeArgsInstructor(req.params.value, args);
+			DD.makeArgsInstructor(req, args);
 			if (req.params.value == "cancel") {
 				if (args.exams[req.query.exam]) {
 					args.exams[req.query.exam].selected = true;
@@ -181,30 +183,15 @@ module.exports = function(app, fs) {
 					];
 				break;
 				case "cancel":
-					var exam 	= req.body.exam; //exam POST value
 					//do something with this
-					args.result = "Success?"; //display result to user
+					EM.removePendingExam(req); //display result to user
+					//args.result = "test";
 				break;
 				case "request":
-					var start_month	= req.body.start_month;
-					var start_day	= req.body.start_day;
-					var start_hour	= req.body.start_hour;
-					var start_minute= req.body.start_minute;
-					var start_ampm	= req.body.start_ampm;
-					var end_month	= req.body.end_month;
-					var end_day		= req.body.end_day;
-					var end_hour	= req.body.end_hour;
-					var end_minute	= req.body.end_minute;
-					var end_ampm	= req.body.end_ampm;
-					var duration	= req.body.duration;
-					var type		= req.body.type;	//'course' or 'ad-hoc'
-					var course		= req.body.course;	//course
-					var term		= req.body.term;	//course
-					var name		= req.body.name;	//ad-hoc
-					var students	= req.body.students;//ad-hoc
+					EM.createExam(req);
 				break;
 			}
-			DD.makeArgsInstructor(req.params.value, args);
+			DD.makeArgsInstructor(req, args);
 			res.render('frame', args);
 		}
 	});
@@ -235,7 +222,7 @@ module.exports = function(app, fs) {
 				partial: "admin_" + req.params.value,
 				logout: true,
 			};
-			DD.makeArgsAdmin(req.params.value, args);
+			DD.makeArgsAdmin(req, args);
 			res.render('frame', args);
 		}
 	});
@@ -278,7 +265,6 @@ module.exports = function(app, fs) {
 				break;
 				case "import":
 					var uploadStatus = IM.upload(req, res);
-					console.log(req.file);
 					args.result = uploadStatus; //display result to user
 				break;
 				case "info":
@@ -345,7 +331,7 @@ module.exports = function(app, fs) {
 					];
 				break;
 			}
-			DD.makeArgsAdmin(req.params.value, args);
+			DD.makeArgsAdmin(req, args);
 			res.render('frame', args);
 		}
 	});

@@ -1,4 +1,4 @@
-//require modules
+//require node modules
 var express = require('express');
 var path = require('path');
 var fs = require('fs');
