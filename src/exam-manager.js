@@ -120,17 +120,15 @@ exports.removePendingExam = function(req, callback) {
 }
 
 //Approve exam
-exports.approvePendingExam = function(exam, callback) {
+exports.approvePendingExam = function(exam) {
 	exams.update({
 		examID: exam
 	},{
 		$set: {status: "approved"}
 	});
-	return callback("Approved");
 }
 
 //Deny exam
-exports.denyPendingExam = function(exam, callback) {
+exports.denyPendingExam = function(exam) {
 	exams.remove({examID: exam});
-	return callback("Approved");
 }

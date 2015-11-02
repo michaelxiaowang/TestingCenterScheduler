@@ -185,10 +185,12 @@ exports.makeArgsAdmin = function(req, args, callback) {
 			if (req.query.approve) {
 				var request = req.query.approve;
 				//approve request
+				EM.approvePendingExam(request);
 			}
 			if (req.query.deny) {
 				var request = req.query.deny;
 				//deny request
+				EM.denyPendingExam(request);
 			}
 			args.data = [];
 			//Find the pending requests in database
@@ -202,8 +204,8 @@ exports.makeArgsAdmin = function(req, args, callback) {
 					args.data.push({course: pendingRequests[i].examID, 
 						start: prettyDate(pendingRequests[i].startDate) + " at " + msToHour(pendingRequests[i].startTime), 
 						end: prettyDate(pendingRequests[i].endDate) + " at " + msToHour(pendingRequests[i].endTime), 
-						approve: EM.approvePendingExam(pendingRequests[i].examID, function(result) {args.result = result}), 
-						deny: EM.denyPendingExam(pendingRequests[i].examID, function(result) {args.result = result})});
+						approve: "/admin/review/?approve=" + pendingRequests[i].examID, 
+						deny: "/admin/review/?deny=" + pendingRequests[i].examID});
 				}
 			})
 			callback();
@@ -335,8 +337,11 @@ exports.makeArgsStudent = function(req, args, callback) {
 					//find each exam with this class id
 					exams.find({ClassID: rosterArray[i].ClassID}).toArray(function(err, examArray) {
 						for(j in examArray) {
-							//push each class with an exam to display to user
-							args.exams.push({name: examArray[j].examID, value: "course POST value"});
+							//push each class with an exam that's approved to display to user
+							if(examArray[j].status == 'approved') {
+								console.log('test');
+								args.exams.push({name: examArray[j].examID, value: "course POST value"});
+							}
 						}
 					});
 				}
