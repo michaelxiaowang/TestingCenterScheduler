@@ -108,8 +108,9 @@ module.exports = function(app, fs) {
 					args.result = "Success?"; //display result to user
 				break;
 			}
-			DD.makeArgsStudent(req, args);
-			res.render('frame', args);
+			DD.makeArgsStudent(req, args, function(args) {
+				res.render('frame', args);
+			});
 		}
 	});
 
@@ -166,18 +167,25 @@ module.exports = function(app, fs) {
 						{student:"student display", time:"appointment time", seat:"assigned seat", present:"present for appointment (Yes/No)"},
 						{student:"student display", time:"appointment time", seat:"assigned seat", present:"present for appointment (Yes/No)"},
 					];
+					DD.makeArgsInstructor(req, args);
+					res.render('frame', args);
 				break;
 				case "cancel":
 					//do something with this
-					EM.removePendingExam(req); //display result to user
-					//args.result = "test";
+					EM.removePendingExam(req, function(result) {
+						args.result = result; //display result to user
+						DD.makeArgsInstructor(req, args);
+						res.render('frame', args);
+					}); 
 				break;
 				case "request":
-					EM.createExam(req);
+					EM.createExam(req, function(result) {
+						args.result = result;
+						DD.makeArgsInstructor(req, args);
+						res.render('frame', args);
+					});
 				break;
 			}
-			DD.makeArgsInstructor(req, args);
-			res.render('frame', args);
 		}
 	});
 
@@ -207,8 +215,9 @@ module.exports = function(app, fs) {
 				partial: "admin_" + req.params.value,
 				logout: true,
 			};
-			DD.makeArgsAdmin(req, args);
-			res.render('frame', args);
+			DD.makeArgsAdmin(req, args, function() {
+				res.render('frame', args);
+			});
 		}
 	});
 
@@ -253,91 +262,8 @@ module.exports = function(app, fs) {
 					args.result = uploadStatus; //display result to user
 				break;
 				case "info":
-					var term 		= req.body.term;
-					var termname	= req.body.termname;
-					var seats 		= req.body.seats;
-					var sas			= req.body.sas; //set-aside seats
-					var gap			= req.body.gap;
-					var reminder	= req.body.reminder; //interval
-					//monday hours
-					var from_hour_mon	= req.body.from_hour_mon;
-					var from_minute_mon	= req.body.from_minute_mon;
-					var from_ampm_mon	= req.body.from_ampm_mon;
-					var to_hour_mon		= req.body.to_hour_mon;
-					var to_minute_mon	= req.body.to_minute_mon;
-					var to_ampm_mon		= req.body.to_ampm_mon;
-					//tuesday hours
-					var from_hour_tue	= req.body.from_hour_tue;
-					var from_minute_tue	= req.body.from_minute_tue;
-					var from_ampm_tue	= req.body.from_ampm_tue;
-					var to_hour_tue		= req.body.to_hour_tue;
-					var to_minute_tue	= req.body.to_minute_tue;
-					var to_ampm_tue		= req.body.to_ampm_tue;
-					//wednesday hours
-					var from_hour_wed	= req.body.from_hour_wed;
-					var from_minute_wed	= req.body.from_minute_wed;
-					var from_ampm_wed	= req.body.from_ampm_wed;
-					var to_hour_wed		= req.body.to_hour_wed;
-					var to_minute_wed	= req.body.to_minute_wed;
-					var to_ampm_wed		= req.body.to_ampm_wed;
-					//thursday hours
-					var from_hour_thu	= req.body.from_hour_thu;
-					var from_minute_thu	= req.body.from_minute_thu;
-					var from_ampm_thu	= req.body.from_ampm_thu;
-					var to_hour_thu		= req.body.to_hour_thu;
-					var to_minute_thu	= req.body.to_minute_thu;
-					var to_ampm_thu		= req.body.to_ampm_thu;
-					//friday hours
-					var from_hour_fri	= req.body.from_hour_fri;
-					var from_minute_fri	= req.body.from_minute_fri;
-					var from_ampm_fri	= req.body.from_ampm_fri;
-					var to_hour_fri		= req.body.to_hour_fri;
-					var to_minute_fri	= req.body.to_minute_fri;
-					var to_ampm_fri		= req.body.to_ampm_fri;
-					//saturday hours
-					var from_hour_sat	= req.body.from_hour_sat;
-					var from_minute_sat	= req.body.from_minute_sat;
-					var from_ampm_sat	= req.body.from_ampm_sat;
-					var to_hour_sat		= req.body.to_hour_sat;
-					var to_minute_sat	= req.body.to_minute_sat;
-					var to_ampm_sat		= req.body.to_ampm_sat;
-					//sunday hours
-					var from_hour_sun	= req.body.from_hour_sun;
-					var from_minute_sun	= req.body.from_minute_sun;
-					var from_ampm_sun	= req.body.from_ampm_sun;
-					var to_hour_sun		= req.body.to_hour_sun;
-					var to_minute_sun	= req.body.to_minute_sun;
-					var to_ampm_sun		= req.body.to_ampm_sun;
-					//closd periods
-					var closed = new Array();
-					var i = 0;
-					while(req.body["closed_from_month_"+i]) {
-						closed[i] = new Object();
-						closed[i].from_month= req.body["closed_from_month_"	+i];
-						closed[i].from_day	= req.body["closed_from_day_"	+i];
-						closed[i].to_month	= req.body["closed_to_month_"	+i];
-						closed[i].to_day	= req.body["closed_to_day_"		+i];
-						i++;
-					}
-					//reserved periods
-					var reserved = new Array();
-					i = 0;
-					while(req.body["from_month_"+i]) {
-						reserved[i] = new Object();
-						reserved[i].from_month	= req.body["from_month_"	+i];
-						reserved[i].from_day	= req.body["from_day_"		+i];
-						reserved[i].from_hour	= req.body["from_hour_"		+i];
-						reserved[i].from_minute	= req.body["from_minute_"	+i];
-						reserved[i].from_ampm	= req.body["from_ampm_"		+i];
-						reserved[i].to_month	= req.body["to_month_"		+i];
-						reserved[i].to_day		= req.body["to_day_"		+i];
-						reserved[i].to_hour		= req.body["to_hour_"		+i];
-						reserved[i].to_minute	= req.body["to_minute_"		+i];
-						reserved[i].to_ampm		= req.body["to_ampm_"		+i];
-						i++;
-					}
 					//do something with these
-					TM.updateTCInfo(req);
+					TM.updateTCInfo(req, args);
 					args.result = "Saved?"; //display result to user
 				break;
 				case "report":
@@ -394,8 +320,9 @@ module.exports = function(app, fs) {
 					];
 				break;
 			}
-			DD.makeArgsAdmin(req, args);
-			res.render('frame', args);
+			DD.makeArgsAdmin(req, args, function() {
+				res.render('frame', args);
+			});	
 		}
 	});
 	

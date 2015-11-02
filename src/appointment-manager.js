@@ -6,6 +6,7 @@ var appointments = db.collection('appointments');
 
 /*Creates a new appointment*/
 exports.studentCreateAppointment = function(req) {
+	console.log(req.body.exam);
 	exams.findOne({examID: req.body.exam}, function(err, exam) {
 		if(err) {
 			console.log(err);
@@ -16,6 +17,7 @@ exports.studentCreateAppointment = function(req) {
 		if(req.body.ampm == 'pm') {
 			req.body.hour += 12;
 		}
+		console.log(exam);
 		//var duration = req.body.hour*3600000 + req.body.minute*60000 + exam.duration;
 
 	});
