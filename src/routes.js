@@ -99,18 +99,23 @@ module.exports = function(app, fs) {
 			switch(req.params.value) {
 				case "add":
 					//do something with these
-					AM.studentCreateAppointment(req);
-					args.result = "Success?"; //display result to user
+					AM.studentCreateAppointment(req, function(result) {
+						args.result = result; //display result to user
+						DD.makeArgsStudent(req, args, function(args) {
+							res.render('frame', args);
+						});
+					});	
 				break;
 				case "cancel":
-					var exam	= req.body.exam; //exam POST value
 					//do something with this
-					args.result = "Success?"; //display result to user
+					AM.cancelAppointment(req, function(result) {
+						args.result = result; //display result to user
+						DD.makeArgsStudent(req, args, function(args) {
+							res.render('frame', args);
+						});
+					});
 				break;
 			}
-			DD.makeArgsStudent(req, args, function(args) {
-				res.render('frame', args);
-			});
 		}
 	});
 
@@ -162,13 +167,10 @@ module.exports = function(app, fs) {
 			};
 			switch(req.params.value) {
 				case "attendance":
-					args.data	= [ //result based on input
-						{student:"student display", time:"appointment time", seat:"assigned seat", present:"present for appointment (Yes/No)"},
-						{student:"student display", time:"appointment time", seat:"assigned seat", present:"present for appointment (Yes/No)"},
-						{student:"student display", time:"appointment time", seat:"assigned seat", present:"present for appointment (Yes/No)"},
-					];
-					DD.makeArgsInstructor(req, args);
-					res.render('frame', args);
+					DD.viewAttendance(req, args, function() {
+						DD.makeArgsInstructor(req, args);
+						res.render('frame', args);
+					})
 				break;
 				case "cancel":
 					//do something with this

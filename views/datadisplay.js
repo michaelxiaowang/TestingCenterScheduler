@@ -5,6 +5,7 @@ var db = require('../src/db');
 var exams = db.collection('exams');
 var classes = db.collection('classes');
 var roster = db.collection('roster');
+var appointments = db.collection('appointments');
 var testingcenters = db.collection('testingcenters');
 
 var EM = require(path.join(__dirname, '../src/exam-manager'));
@@ -254,7 +255,7 @@ exports.makeArgsInstructor = function(req, args) {
 				}
 				for(i in examArray) {
 					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
-						args.exams.push({name: examArray[i].examID, value: "exam POST value"});
+						args.exams.push({name: examArray[i].examID, value: examArray[i].examID});
 					}
 				}
 			});
@@ -339,8 +340,7 @@ exports.makeArgsStudent = function(req, args, callback) {
 						for(j in examArray) {
 							//push each class with an exam that's approved to display to user
 							if(examArray[j].status == 'approved') {
-								console.log('test');
-								args.exams.push({name: examArray[j].examID, value: "course POST value"});
+								args.exams.push({name: examArray[j].examID, value: examArray[j].examID});
 							}
 						}
 					});
@@ -350,26 +350,56 @@ exports.makeArgsStudent = function(req, args, callback) {
 		break;
 		case "cancel":
 			args.action = "/student/cancel"; //POST action
-			args.exams	= [
-				{name:"exam display name1", value:"exam POST value"},
-				{name:"exam display name2", value:"exam POST value"},
-				{name:"exam display name3", value:"exam POST value"},
-			];
-			if (args.exams[req.query.exam]) {
-					args.exams[req.query.exam].selected = true;
+			args.exams = [];
+			//get a list of exams student has appointments for
+			appointments.find({student: req.user.NetID}).toArray(function(err, appointmentArray) {
+				if(err) {
+					console.log(err);
 				}
+				//push each appointment student has
+				for(i in appointmentArray) {
+					args.exams.push({name: appointmentArray[i].examID, value: appointmentArray[i].examID});
+				}
+			})
+			//If a query exists, pre-select the particular exam
+			if (args.exams[req.query.exam]) {
+				args.exams[req.query.exam].selected = true;
+			}
 			callback(args);
 		break;
 		case "list":
-			args.data	= [
-				{class:"class display name1", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=0"},
-				{class:"class display name2", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=1"},
-				{class:"class display name3", date:"exam display date", time:"exam display time", cancel:"/student/cancel?exam=2"},
-			]
+			args.data = [];
+			appointments.find({student: req.user.NetID}).toArray(function(err, appointmentArray) {
+				if(err) {
+					console.log(err);
+				}
+				for(i in appointmentArray) {
+					args.data.push({class: appointmentArray[i].examID, date: prettyDate(appointmentArray[i].day), 
+						time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), cancel: "/student/cancel?exam=" + i});
+				}
+			})
 			callback(args);
 		break;
 	}
 };
+
+//view the attendance for an exam
+exports.viewAttendance = function(req, args, callback) {
+	args.data = [];
+	//get a list of all appointments with this exam id
+	appointments.find({examID: req.body.exam}).toArray(function(err, appointmentArray) {
+		if(err) {
+			console.log(err);
+		}
+		//for each appointment
+		for(i in appointmentArray) {
+			//push the appointment's information
+			args.data.push({student: appointmentArray[i].student, time: prettyDate(appointmentArray[i].day) + " at " + msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), 
+				seat: "assigned seat", present: appointmentArray[i].attended});
+		}
+		callback();
+	})
+}
 
 //Gets the format of a Date in: Day of Week, Month Day of Month, Year
 function prettyDate(date) {

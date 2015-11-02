@@ -115,6 +115,8 @@ exports.removePendingExam = function(req, callback) {
 					return callback("Cannot remove exam that does not have the status 'pending'.");
 				}
 			});	
+		} else {
+			return callback("Cannot cancel because no exam is selected.");
 		}
 	});
 }
