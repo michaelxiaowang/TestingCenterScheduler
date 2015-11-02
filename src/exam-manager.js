@@ -3,8 +3,15 @@ var classes = db.collection('classes');
 var roster = db.collection('roster');
 var exams = db.collection('exams');
 
+//set up logger
+log4js.loadAppender('file');
+log4js.addAppender(log4js.appenders.file('logs/instructor_request.log'),	'instructor_request');
+log4js.addAppender(log4js.appenders.file('logs/instructor_cancel.log'),		'instructor_cancel');
+log4js.addAppender(log4js.appenders.file('logs/admin_review.log'),			'admin_review');
+
 //Create an exam request
 exports.createExam = function(req, callback) {
+	log4js.getLogger('instructor_request').trace("Entering EM.createExam");
 	var students	= req.body.students;//ad-hoc
 	
 	//Set the variables related to exam term and time
@@ -25,14 +32,17 @@ exports.createExam = function(req, callback) {
 	var adhoc = (req.body.type == "ad-hoc");
 	//If not adhoc
 	if(!adhoc) {
+		log4js.getLogger('instructor_request').info("course exam");
 		//If the name field is empty, inform user
 		if(req.body.name[0] == "") {
+				log4js.getLogger('instructor_request').warn("Must have Exam Name field.");
 				return callback("Must have Exam Name field");
 		}
 		//Find a course with the course name
 		classes.findOne({Class: req.body.course}, function(err, course) {
 			if(err) {
 				console.log(err);
+				log4js.getLogger('instructor_request').error(err);
 			}
 			//Get the class id from course name
 			ClassID = course.ClassID;
@@ -42,9 +52,11 @@ exports.createExam = function(req, callback) {
 			roster.findOne({"ClassID": ClassID}, function(err, roster) {
 				if(err) {
 					console.log(err);
+					log4js.getLogger('instructor_request').error(err);
 				}
 				Roster = roster.Roster;
-			})
+			});
+			log4js.getLogger('instructor_request').info("{ClassID:"+ClassID+", examID:"+examID", Instructors:"+req.user.NetID+", Roster:"+Roster+", startTime:"+startTime+", startDate:"+startDate+", endTime:"+endTime+", endDate:"+endDate+", duration:"+duration+", adhoc:"+adhoc+", status:pending}");
 			//Insert the exam into database
 			exams.insert({
 				"ClassID": ClassID,
@@ -59,12 +71,15 @@ exports.createExam = function(req, callback) {
 				"adhoc": adhoc,
 				"status": "pending"
 			});
+			log4js.getLogger('instructor_request').debug("Exam created.");
 			//Inform user request was successsful
 			return callback("Success");
 		});
 	} else { //is adhoc
+		log4js.getLogger('instructor_request').info("ad-hoc exam");
 		//If the name field is empty, inform user
 		if(req.body.name[1] == "") {
+				log4js.getLogger('instructor_request').warn("Must have Exam Name field.");
 				return callback("Must have Exam Name field");
 		}
 		var ClassID = "adhoc"; //ClassID is adhoc
@@ -77,6 +92,7 @@ exports.createExam = function(req, callback) {
 			//insert the netid into roster
 			Roster.push(studentInfo[0]);
 		}
+		log4js.getLogger('instructor_request').info("{ClassID:"+ClassID+", examID:"+examID", Instructors:"+req.user.NetID+", Roster:"+Roster+", startTime:"+startTime+", startDate:"+startDate+", endTime:"+endTime+", endDate:"+endDate+", duration:"+duration+", adhoc:"+adhoc+", status:pending}");
 		//Insert the exam into database
 		exams.insert({
 			"ClassID": ClassID,
@@ -91,6 +107,7 @@ exports.createExam = function(req, callback) {
 			"adhoc": adhoc,
 			"status": "pending"
 		});
+		log4js.getLogger('instructor_request').debug("Exam created.");
 		//Inform user request was successsful
 		return callback("Success");
 	}
@@ -98,24 +115,30 @@ exports.createExam = function(req, callback) {
 
 //Remove a pending exam request
 exports.removePendingExam = function(req, callback) {
+	log4js.getLogger('instructor_cancel').trace("Entering EM.removePendingExam");
 	//Remove only if numbers of exams > 0
 	exams.count(function(err, count) {
 		if(count > 0) {
 			exams.findOne({examID: req.body.exam}, function(err, exam) {
 				if(err) {
 					console.log(err);
+					log4js.getLogger('instructor_cancel').error(err);
 				}
 				//remove the exam only if it is pending
 				if (exam.status == "pending") {
+					log4js.getLogger('instructor_cancel').info("{examID:"+req.body.exam+"}");
 					exams.remove({examID: req.body.exam});
 					//Inform user that removing was successful
+					log4js.getLogger('instructor_cancel').debug("Exam removed.");
 					return callback("Exam removed.");
 				} else {
 					//User cannot remove exam that is not pending
+					log4js.getLogger('instructor_cancel').warn("Cannot remove exam that does not have the status 'pending'.");
 					return callback("Cannot remove exam that does not have the status 'pending'.");
 				}
 			});	
 		} else {
+			log4js.getLogger('instructor_cancel').warn("Cannot cancel because no exam is selected.");
 			return callback("Cannot cancel because no exam is selected.");
 		}
 	});
@@ -123,14 +146,20 @@ exports.removePendingExam = function(req, callback) {
 
 //Approve exam
 exports.approvePendingExam = function(exam) {
+	log4js.getLogger('admin_review').trace("Entering EM.approvePendingExam");
+	log4js.getLogger('admin_review').info("{examID:+"+exam+", status: approved}");
 	exams.update({
 		examID: exam
 	},{
 		$set: {status: "approved"}
 	});
+	log4js.getLogger('admin_checkin').debug("Exam approved.");
 }
 
 //Deny exam
 exports.denyPendingExam = function(exam) {
+	log4js.getLogger('admin_review').trace("Entering EM.denyPendingExam");
+	log4js.getLogger('admin_review').info("{examID:+"+exam+"}");
 	exams.remove({examID: exam});
+	log4js.getLogger('admin_checkin').debug("Exam removed.");
 }
