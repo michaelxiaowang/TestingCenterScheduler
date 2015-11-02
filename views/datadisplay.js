@@ -11,7 +11,6 @@ var testingcenters = db.collection('testingcenters');
 var EM = require(path.join(__dirname, '../src/exam-manager'));
 var AM = require(path.join(__dirname, '../src/appointment-manager'));
 
-
 //The makeArgs function query the database for relevant info and display it to the user
 exports.makeArgsAdmin = function(req, args, callback) {
 	switch(req.params.value) {
@@ -310,7 +309,12 @@ exports.makeArgsInstructor = function(req, args) {
 				for(i in examArray) {
 					//Push the fields to display to user
 					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
-						args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToHour(examArray[i].startTime), 
+						if(examArray[i].status == 'approved') 	
+							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToHour(examArray[i].startTime), 
+							end: prettyDate(examArray[i].endDate) + " at " + msToHour(examArray[i].endTime), status: examArray[i].status, 
+							scheduled: 0, taken: 0});
+						else
+							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToHour(examArray[i].startTime), 
 							end: prettyDate(examArray[i].endDate) + " at " + msToHour(examArray[i].endTime), status: examArray[i].status, 
 							scheduled: 0, taken: 0, cancel:"/instructor/cancel?exam=" + i});
 					}

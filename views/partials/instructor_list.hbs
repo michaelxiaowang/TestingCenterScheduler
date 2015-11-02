@@ -18,7 +18,7 @@
 			<td>{{status}}</td>
 			<td>{{scheduled}}</td>
 			<td>{{taken}}</td>
-			<td><a href="{{cancel}}">Cancel</a></td>
+			<td>{{#if cancel}}<a href="{{cancel}}">Cancel</a>{{/if}}</td>
 		</tr>
 		{{/each}}
 	</table>
