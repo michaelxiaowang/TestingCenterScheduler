@@ -251,22 +251,26 @@ module.exports = function(app, fs) {
 					args.result = "Success?"; //display result to user
 				break;
 				case "checkin":
-					var id		= req.body.studentid;
-					//do something with this
-					args.data	= [ //result based on input
-						{class:"class display name", date:"display date", time:"display time", confirm:"/admin/?"},
-						{class:"class display name", date:"display date", time:"display time", confirm:"/admin/?"},
-						{class:"class display name", date:"display date", time:"display time", confirm:"/admin/?"},
-					];
+					DD.checkInList(req, args, function() {
+						DD.makeArgsAdmin(req, args, function() {
+							res.render('frame', args);
+						});	
+					});
 				break;
 				case "import":
 					var uploadStatus = IM.upload(req, res);
 					args.result = uploadStatus; //display result to user
+					DD.makeArgsAdmin(req, args, function() {
+						res.render('frame', args);
+					});	
 				break;
 				case "info":
 					//do something with these
 					TM.updateTCInfo(req, args);
 					args.result = "Saved?"; //display result to user
+					DD.makeArgsAdmin(req, args, function() {
+						res.render('frame', args);
+					});	
 				break;
 				case "report":
 					var type	= req.body.type; //'day' 'week' 'term' or 'range'
@@ -306,6 +310,9 @@ module.exports = function(app, fs) {
 							{term:"term display name", appts:"number of appointments"},
 						];
 					}
+					DD.makeArgsAdmin(req, args, function() {
+						res.render('frame', args);
+					});	
 				break;
 				case "util":
 					var from_term	= req.body.from_term; //term
@@ -320,11 +327,11 @@ module.exports = function(app, fs) {
 						{day:"display date", util:"utilization (see spec)"},
 						{day:"display date", util:"utilization (see spec)"},
 					];
+					DD.makeArgsAdmin(req, args, function() {
+						res.render('frame', args);
+					});	
 				break;
 			}
-			DD.makeArgsAdmin(req, args, function() {
-				res.render('frame', args);
-			});	
 		}
 	});
 	

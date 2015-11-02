@@ -53,3 +53,18 @@ exports.cancelAppointment = function(req, callback) {
 		}
 	});
 }
+
+/*Confirm an appointment*/
+exports.confirmAppointment = function(student, exam) {
+	appointments.update({
+		"student": student,
+		"examID": exam
+	},{
+		$set: {attended: true}
+	});
+}
+
+//Admin cancel appointment
+exports.adminCancel = function(student, exam) {
+	appointments.remove({"student": student, examID: exam});
+}

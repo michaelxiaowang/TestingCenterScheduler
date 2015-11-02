@@ -9,6 +9,7 @@ var appointments = db.collection('appointments');
 var testingcenters = db.collection('testingcenters');
 
 var EM = require(path.join(__dirname, '../src/exam-manager'));
+var AM = require(path.join(__dirname, '../src/appointment-manager'));
 
 
 //The makeArgs function query the database for relevant info and display it to the user
@@ -183,11 +184,13 @@ exports.makeArgsAdmin = function(req, args, callback) {
 			callback();
 		break;
 		case "review": //Review Requests
+			//if approval query string exists in url
 			if (req.query.approve) {
 				var request = req.query.approve;
 				//approve request
 				EM.approvePendingExam(request);
 			}
+			//if denial query string exists in url
 			if (req.query.deny) {
 				var request = req.query.deny;
 				//deny request
@@ -199,9 +202,9 @@ exports.makeArgsAdmin = function(req, args, callback) {
 				if(err) {
 					console.log(err);
 				}
+				//for each pending request
 				for(i in pendingRequests) {
-					startDate = (pendingRequests[i].startDate.getMonth()+1) + "/" + pendingRequests[i].startDate.getDate() + "/" + pendingRequests[i].startDate.getFullYear();
-					endDate = (pendingRequests[i].endDate.getMonth()+1) + "/" + pendingRequests[i].endDate.getDate() + "/" + pendingRequests[i].endDate.getFullYear();
+					//push the info for each pending exam into the array args.data
 					args.data.push({course: pendingRequests[i].examID, 
 						start: prettyDate(pendingRequests[i].startDate) + " at " + msToHour(pendingRequests[i].startTime), 
 						end: prettyDate(pendingRequests[i].endDate) + " at " + msToHour(pendingRequests[i].endTime), 
@@ -221,15 +224,35 @@ exports.makeArgsAdmin = function(req, args, callback) {
 			callback();
 		break;
 		case "list": //Appointment List
-			args.data	= [
-				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-				{course:"class display name", student:"student display", date:"display date", time:"display time", cancel:"/admin/?", modify:"/admin/?"},
-			];
-			callback();
+			args.data = [];
+			//If cancel query exists in url
+			if(req.query.cancel) {
+				AM.adminCancel(req.query.cancel, req.query.exam);
+			}
+			//Get all the appointments
+			appointments.find().toArray(function(err, appointmentArray) {
+				if(err) {
+					console.log(err);
+				}
+				//for each appointment
+				for(i in appointmentArray) {
+					//if not attended
+					if(appointmentArray[i].attended == false) {
+						args.data.push({course: appointmentArray[i].examID, student: appointmentArray[i].student, date: prettyDate(appointmentArray[i].day),
+							time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime),
+							cancel: "/admin/list/?cancel=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
+							modify: "/admin/list/?modify=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
+						});
+					}
+				}
+				callback();
+			});		
 		break;
 		case "checkin": //Check-In Student
 			args.action = "/admin/checkin"; //POST action
+			if (req.query.confirm) {
+				AM.confirmAppointment(req.query.confirm, req.query.exam);
+			}
 			callback();
 		break;
 		case "report": //Generate Report
@@ -399,6 +422,26 @@ exports.viewAttendance = function(req, args, callback) {
 		}
 		callback();
 	})
+}
+
+//get check-in list
+exports.checkInList = function(req, args, callback) {
+	args.data = [];
+	//get a list of all appointments associated with this id
+	appointments.find({student: req.body.studentid}).toArray(function (err, appointmentArray) {
+		if(err) {
+			console.log(err);
+		}
+		for(i in appointmentArray) {
+			//if attended is false, push the appointment info into args.data
+			if(appointmentArray[i].attended == false) {
+				args.data.push({class: appointmentArray[i].examID, date: prettyDate(appointmentArray[i].day), 
+				time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), 
+				confirm:"/admin/checkin/?confirm=" + appointmentArray[i].student + "&exam=" + appointmentArray[i].examID});
+			}
+		}
+		callback();
+	});
 }
 
 //Gets the format of a Date in: Day of Week, Month Day of Month, Year
