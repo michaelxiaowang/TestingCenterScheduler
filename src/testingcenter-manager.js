@@ -3,14 +3,9 @@ var testingcenters = db.collection('testingcenters');
 
 //Exported functions can be used by other file that require this module
 
-//set up logger
-log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('logs/admin_import.log'),			'admin_import');
-
 /*Updates the testing center info, there can only be one testing center with a particular term,
 For duplicate terms, the newest one will replace previous versions*/
 exports.updateTCInfo = function(req, args) {
-	log4js.getLogger('admin_import').trace("Entering AM.updateTCInfo");
     //closed periods
     var closed = new Array();
     var i = 0;
@@ -62,28 +57,6 @@ exports.updateTCInfo = function(req, args) {
     },{
      	upsert: true
     });
-	
-	log4js.getLogger('admin_import').info({
-    	Term: req.body.term,
-        Name: req.body.termname,
-    	numSeats: req.body.seats,
-		numSetAside: req.body.sas, //set-aside seats
-		gapTime: req.body.gap,
-        OperatingHours: {
-            //Convert all the HH:MM AM/PM to milliseconds
-            Monday: [hourToMS(req.body.from_hour_mon, req.body.from_minute_mon, req.body.from_ampm_mon), hourToMS(req.body.to_hour_mon, req.body.to_minute_mon, req.body.to_ampm_mon)],
-            Tuesday: [hourToMS(req.body.from_hour_tue, req.body.from_minute_tue, req.body.from_ampm_tue), hourToMS(req.body.to_hour_tue, req.body.to_minute_tue, req.body.to_ampm_tue)],
-            Wednesday: [hourToMS(req.body.from_hour_wed, req.body.from_minute_wed, req.body.from_ampm_wed), hourToMS(req.body.to_hour_wed, req.body.to_minute_wed, req.body.to_ampm_wed)],
-            Thursday: [hourToMS(req.body.from_hour_thu, req.body.from_minute_thu, req.body.from_ampm_thu), hourToMS(req.body.to_hour_thu, req.body.to_minute_thu, req.body.to_ampm_thu)],
-            Friday: [hourToMS(req.body.from_hour_fri, req.body.from_minute_fri, req.body.from_ampm_fri), hourToMS(req.body.to_hour_fri, req.body.to_minute_fri, req.body.to_ampm_fri)],
-            Saturday: [hourToMS(req.body.from_hour_sat, req.body.from_minute_sat, req.body.from_ampm_sat), hourToMS(req.body.to_hour_sat, req.body.to_minute_sat, req.body.to_ampm_sat)],
-            Sunday: [hourToMS(req.body.from_hour_sun, req.body.from_minute_sun, req.body.from_ampm_sun), hourToMS(req.body.to_hour_sun, req.body.to_minute_sun, req.body.to_ampm_sun)]
-        },
-        ClosedDates: closed,
-        ReservedDates: reserved,
-        ReminderInterval: req.body.reminder, //interval
-    });
-	log4js.getLogger('admin_import').debug("Testing Center information updated.");
 }
 
 //HH:MM AM/PM format to milliseconds

@@ -1,20 +1,4 @@
 var path = require('path');
-var log4js = require('log4js');
-
-//set up logger
-log4js.loadAppender('file');
-log4js.addAppender(log4js.appenders.file('logs/student_add.log'),			'student_add');
-log4js.addAppender(log4js.appenders.file('logs/student_cancel.log'),		'student_cancel');
-log4js.addAppender(log4js.appenders.file('logs/student_list.log'),			'student_list');
-log4js.addAppender(log4js.appenders.file('logs/instructor_attendance.log'),	'instructor_attendance');
-log4js.addAppender(log4js.appenders.file('logs/instructor_cancel.log'),		'instructor_cancel');
-log4js.addAppender(log4js.appenders.file('logs/instructor_list.log'),		'instructor_list');
-log4js.addAppender(log4js.appenders.file('logs/instructor_request.log'),	'instructor_request');
-log4js.addAppender(log4js.appenders.file('logs/admin_info.log'),			'admin_info');
-log4js.addAppender(log4js.appenders.file('logs/admin_checkin.log'),			'admin_checkin');
-log4js.addAppender(log4js.appenders.file('logs/admin_import.log'),			'admin_import');
-log4js.addAppender(log4js.appenders.file('logs/admin_list.log'),			'admin_list');
-log4js.addAppender(log4js.appenders.file('logs/admin_review.log'),			'admin_review');
 
 //require db
 var db = require('../src/db');
@@ -373,7 +357,6 @@ exports.makeArgsInstructor = function(req, args) {
 exports.makeArgsStudent = function(req, args, callback) {
 	switch(req.params.value) {
 		case "add":
-			log4js.getLogger('student_add').trace("Generating args for page");
 			args.action = "/student/add"; //POST action
 			args.exams = [];
 			//get the roster collection objects into an array
