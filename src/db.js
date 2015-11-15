@@ -13,6 +13,10 @@ var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}),
 	}
 	//Create initial user objects for easy testing, will be removed in live version
 	db.createCollection("users", function(err, collection) {
+
+        if(err) {
+            console.log(err);
+        }
 		//admin obj
 		collection.update({
         	NetID: "admin"

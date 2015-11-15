@@ -78,13 +78,15 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						args.to_ampm_sun	= "am";
 						//current setting for closed date ranges
 						args.closed = [
-							{from_month:1, from_day:1, to_month:1, to_day:1},
-							{from_month:1, from_day:1, to_month:1, to_day:1},
+							{from_month:1, from_day:1, from_year: new Date().getFullYear(), to_month:1, to_day:1, to_year: new Date().getFullYear()},
+							{from_month:1, from_day:1, from_year: new Date().getFullYear(), to_month:1, to_day:1, to_year: new Date().getFullYear()},
 						]
 						//current settings for reserved time ranges
 						args.reserved = [
-							{from_month:1, from_day:1, from_hour:12, from_minute:0, from_ampm:"am", to_month:1, to_day:1, to_hour:12, to_minute:0, to_ampm:"am"},
-							{from_month:1, from_day:1, from_hour:12, from_minute:0, from_ampm:"am", to_month:1, to_day:1, to_hour:12, to_minute:0, to_ampm:"am"},
+							{from_month:1, from_day:1, from_year: new Date().getFullYear(), from_hour:12, from_minute:0, from_ampm:"am", 
+							to_month:1, to_day:1, to_year: new Date().getFullYear(), to_hour:12, to_minute:0, to_ampm:"am"},
+							{from_month:1, from_day:1, from_year: new Date().getFullYear(), from_hour:12, from_minute:0, from_ampm:"am", 
+							to_month:1, to_day:1, to_year: new Date().getFullYear(), to_hour:12, to_minute:0, to_ampm:"am"},
 						]
 						//TODO: date range
 						args.gap		= 0; //current setting for gap time
@@ -98,66 +100,66 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						args.gap = TC.gapTime;
 						args.reminder = TC.ReminderInterval;
 						//monday
-						args.from_hour_mon	= Math.floor((TC.OperatingHours.Monday[0]/3600000)%12);
+						args.from_hour_mon	= msToHour(TC.OperatingHours.Monday[0]);
 						args.from_minute_mon= Math.floor((TC.OperatingHours.Monday[0]%3600000)/60000);
 						args.from_ampm_mon	= ampm(TC.OperatingHours.Monday[0]);
-						args.to_hour_mon	= Math.floor((TC.OperatingHours.Monday[1]/3600000)%12);
+						args.to_hour_mon	= msToHour(TC.OperatingHours.Monday[1]);
 						args.to_minute_mon	= Math.floor((TC.OperatingHours.Monday[1]%3600000)/60000);
 						args.to_ampm_mon	= ampm(TC.OperatingHours.Monday[1]);
 						//tuesday
-						args.from_hour_tue	= Math.floor((TC.OperatingHours.Tuesday[0]/3600000)%12);
+						args.from_hour_tue	= msToHour(TC.OperatingHours.Tuesday[0]);
 						args.from_minute_tue= Math.floor((TC.OperatingHours.Tuesday[0]%3600000)/60000);
 						args.from_ampm_tue	= ampm(TC.OperatingHours.Tuesday[0]);
-						args.to_hour_tue	= Math.floor((TC.OperatingHours.Tuesday[1]/3600000)%12);
+						args.to_hour_tue	= msToHour(TC.OperatingHours.Tuesday[1]);
 						args.to_minute_tue	= Math.floor((TC.OperatingHours.Tuesday[1]%3600000)/60000);
 						args.to_ampm_tue	= ampm(TC.OperatingHours.Tuesday[1]);
 						//wednesday
-						args.from_hour_wed	= Math.floor((TC.OperatingHours.Wednesday[0]/3600000)%12);
+						args.from_hour_wed	= msToHour(TC.OperatingHours.Wednesday[0]);
 						args.from_minute_wed= Math.floor((TC.OperatingHours.Wednesday[0]%3600000)/60000);
 						args.from_ampm_wed	= ampm(TC.OperatingHours.Wednesday[0]);
-						args.to_hour_wed	= Math.floor((TC.OperatingHours.Wednesday[1]/3600000)%12);
+						args.to_hour_wed	= msToHour(TC.OperatingHours.Wednesday[1]);
 						args.to_minute_wed	= Math.floor((TC.OperatingHours.Wednesday[1]%3600000)/60000);
 						args.to_ampm_wed	= ampm(TC.OperatingHours.Wednesday[1]);
 						//thursday
-						args.from_hour_thu	= Math.floor((TC.OperatingHours.Thursday[0]/3600000)%12);
+						args.from_hour_thu	= msToHour(TC.OperatingHours.Thursday[0]);
 						args.from_minute_thu= Math.floor((TC.OperatingHours.Thursday[0]%3600000)/60000);
 						args.from_ampm_thu	= ampm(TC.OperatingHours.Thursday[0]);
-						args.to_hour_thu	= Math.floor((TC.OperatingHours.Thursday[1]/3600000)%12);
+						args.to_hour_thu	= msToHour(TC.OperatingHours.Thursday[1]);
 						args.to_minute_thu	= Math.floor((TC.OperatingHours.Thursday[1]%3600000)/60000);
 						args.to_ampm_thu	= ampm(TC.OperatingHours.Thursday[1]);
 						//friday
-						args.from_hour_fri	= Math.floor((TC.OperatingHours.Friday[0]/3600000)%12);
+						args.from_hour_fri	= msToHour(TC.OperatingHours.Friday[0]);
 						args.from_minute_fri= Math.floor((TC.OperatingHours.Friday[0]%3600000)/60000);
 						args.from_ampm_fri	= ampm(TC.OperatingHours.Friday[0]);
-						args.to_hour_fri	= Math.floor((TC.OperatingHours.Friday[1]/3600000)%12);
+						args.to_hour_fri	= msToHour(TC.OperatingHours.Friday[1]);
 						args.to_minute_fri	= Math.floor((TC.OperatingHours.Friday[1]%3600000)/60000);
 						args.to_ampm_fri	= ampm(TC.OperatingHours.Friday[1]);
 						//saturday
-						args.from_hour_sat	= Math.floor((TC.OperatingHours.Saturday[0]/3600000)%12);
+						args.from_hour_sat	= msToHour(TC.OperatingHours.Saturday[0]);
 						args.from_minute_sat= Math.floor((TC.OperatingHours.Saturday[0]%3600000)/60000);
 						args.from_ampm_sat	= ampm(TC.OperatingHours.Saturday[0]);
-						args.to_hour_sat	= Math.floor((TC.OperatingHours.Saturday[1]/3600000)%12);
+						args.to_hour_sat	= msToHour(TC.OperatingHours.Saturday[1]);
 						args.to_minute_sat	= Math.floor((TC.OperatingHours.Saturday[1]%3600000)/60000);
 						args.to_ampm_sat	= ampm(TC.OperatingHours.Saturday[1]);
 						//monday
-						args.from_hour_sun	= Math.floor((TC.OperatingHours.Sunday[0]/3600000)%12);
+						args.from_hour_sun	= msToHour(TC.OperatingHours.Sunday[0]);
 						args.from_minute_sun= Math.floor((TC.OperatingHours.Sunday[0]%3600000)/60000);
 						args.from_ampm_sun	= ampm(TC.OperatingHours.Sunday[0]);
-						args.to_hour_sun	= Math.floor((TC.OperatingHours.Sunday[1]/3600000)%12);
+						args.to_hour_sun	= msToHour(TC.OperatingHours.Sunday[1]);
 						args.to_minute_sun	= Math.floor((TC.OperatingHours.Sunday[1]%3600000)/60000);
 						args.to_ampm_sun	= ampm(TC.OperatingHours.Sunday[1]);
 						//closed date ranges
 						args.closed = [];
 						for(i in TC.ClosedDates) {
-							args.closed.push({from_month: TC.ClosedDates[i].Start.getMonth()+1, from_day: TC.ClosedDates[i].Start.getDate(), 
-								to_month: TC.ClosedDates[i].End.getMonth()+1, to_day: TC.ClosedDates[i].End.getDate()});
+							args.closed.push({from_month: TC.ClosedDates[i].Start.getMonth()+1, from_day: TC.ClosedDates[i].Start.getDate(), from_year: TC.ClosedDates[i].Start.getFullYear(),
+								to_month: TC.ClosedDates[i].End.getMonth()+1, to_day: TC.ClosedDates[i].End.getDate(), to_year: TC.ClosedDates[i].End.getFullYear()});
 						}
 						//reserved time ranges
 						args.reserved = [];
 						for(i in TC.ReservedDates) {
-							args.reserved.push({from_month: TC.ReservedDates[i].Start.getMonth()+1, from_day: TC.ReservedDates[i].Start.getDate(), 
+							args.reserved.push({from_month: TC.ReservedDates[i].Start.getMonth()+1, from_day: TC.ReservedDates[i].Start.getDate(), from_year: TC.ClosedDates[i].Start.getFullYear(), 
 								from_hour: TC.ReservedDates[i].Start.getHours()%12, from_minute: TC.ReservedDates[i].Start.getMinutes(), from_ampm: ampm(TC.ReservedDates[i].Start.getHours()), 
-								to_month: TC.ReservedDates[i].End.getMonth()+1, to_day: TC.ReservedDates[i].End.getDate(), 
+								to_month: TC.ReservedDates[i].End.getMonth()+1, to_day: TC.ReservedDates[i].End.getDate(), to_year: TC.ClosedDates[i].End.getFullYear(), 
 								to_hour: TC.ReservedDates[i].End.getHours()%12, to_minute: TC.ReservedDates[i].End.getMinutes(), to_ampm: ampm(TC.ReservedDates[i].End.getHours())})
 						}
 					}
@@ -205,8 +207,8 @@ exports.makeArgsAdmin = function(req, args, callback) {
 				for(i in pendingRequests) {
 					//push the info for each pending exam into the array args.data
 					args.data.push({course: pendingRequests[i].examID, 
-						start: prettyDate(pendingRequests[i].startDate) + " at " + msToHour(pendingRequests[i].startTime), 
-						end: prettyDate(pendingRequests[i].endDate) + " at " + msToHour(pendingRequests[i].endTime), 
+						start: prettyDate(pendingRequests[i].startDate) + " at " + msToTime(pendingRequests[i].startTime), 
+						end: prettyDate(pendingRequests[i].endDate) + " at " + msToTime(pendingRequests[i].endTime), 
 						approve: "/admin/review/?approve=" + pendingRequests[i].examID, 
 						deny: "/admin/review/?deny=" + pendingRequests[i].examID});
 				}
@@ -238,7 +240,7 @@ exports.makeArgsAdmin = function(req, args, callback) {
 					//if not attended
 					if(appointmentArray[i].attended == false) {
 						args.data.push({course: appointmentArray[i].examID, student: appointmentArray[i].student, date: prettyDate(appointmentArray[i].day),
-							time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime),
+							time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime),
 							cancel: "/admin/list/?cancel=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
 							modify: "/admin/list/?modify=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
 						});
@@ -310,12 +312,12 @@ exports.makeArgsInstructor = function(req, args) {
 					//Push the fields to display to user
 					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
 						if(examArray[i].status == 'approved') 	
-							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToHour(examArray[i].startTime), 
-							end: prettyDate(examArray[i].endDate) + " at " + msToHour(examArray[i].endTime), status: examArray[i].status, 
+							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToTime(examArray[i].startTime), 
+							end: prettyDate(examArray[i].endDate) + " at " + msToTime(examArray[i].endTime), status: examArray[i].status, 
 							scheduled: 0, taken: 0});
 						else
-							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToHour(examArray[i].startTime), 
-							end: prettyDate(examArray[i].endDate) + " at " + msToHour(examArray[i].endTime), status: examArray[i].status, 
+							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToTime(examArray[i].startTime), 
+							end: prettyDate(examArray[i].endDate) + " at " + msToTime(examArray[i].endTime), status: examArray[i].status, 
 							scheduled: 0, taken: 0, cancel:"/instructor/cancel?exam=" + i});
 					}
 				}
@@ -402,7 +404,7 @@ exports.makeArgsStudent = function(req, args, callback) {
 				}
 				for(i in appointmentArray) {
 					args.data.push({class: appointmentArray[i].examID, date: prettyDate(appointmentArray[i].day), 
-						time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), cancel: "/student/cancel?exam=" + i});
+						time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), cancel: "/student/cancel?exam=" + i});
 				}
 			})
 			callback(args);
@@ -421,7 +423,7 @@ exports.viewAttendance = function(req, args, callback) {
 		//for each appointment
 		for(i in appointmentArray) {
 			//push the appointment's information
-			args.data.push({student: appointmentArray[i].student, time: prettyDate(appointmentArray[i].day) + " at " + msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), 
+			args.data.push({student: appointmentArray[i].student, time: prettyDate(appointmentArray[i].day) + " at " + msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), 
 				seat: "assigned seat", present: appointmentArray[i].attended});
 		}
 		callback();
@@ -440,7 +442,7 @@ exports.checkInList = function(req, args, callback) {
 			//if attended is false, push the appointment info into args.data
 			if(appointmentArray[i].attended == false) {
 				args.data.push({class: appointmentArray[i].examID, date: prettyDate(appointmentArray[i].day), 
-				time: msToHour(appointmentArray[i].startTime) + " to " + msToHour(appointmentArray[i].endTime), 
+				time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), 
 				confirm:"/admin/checkin/?confirm=" + appointmentArray[i].student + "&exam=" + appointmentArray[i].examID});
 			}
 		}
@@ -456,7 +458,7 @@ function prettyDate(date) {
 }
 
 //Converts milliseconds to HH:MM AM/PM format
-function msToHour(ms) {
+function msToTime(ms) {
 	var hour = Math.floor(ms/3600000);
 	var minutes = Math.floor((ms%3600000)/60000);
 	if(minutes < 10) {
@@ -469,6 +471,16 @@ function msToHour(ms) {
 		return hour.toString() + ":" + minutes + "PM";
 	} 
 	return hour.toString() + ":" + minutes + "AM";
+}
+
+//Converts milliseconds to HH format
+function msToHour(ms) {
+	var hour = Math.floor(ms/3600000)%12;
+	if(hour == 0) {
+		return 12;
+	} else {
+		return hour;
+	}
 }
 
 //milliseconds to apmpm

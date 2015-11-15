@@ -255,6 +255,7 @@
 					<option value="12"{{#equal from_month 12}} selected{{/equal}}>December</option>
 				</select>
 				<input type="number" name="closed_from_day_{{@index}}" value="{{from_day}}" min="1" max="31">
+				<input type="number" name="closed_from_year_{{@index}}" value="{{from_year}}">
 				 to 
 				<select name="closed_to_month_{{@index}}">
 					<option value="1"{{#equal to_month 1}} selected{{/equal}}>January</option>
@@ -271,6 +272,7 @@
 					<option value="12"{{#equal to_month 12}} selected{{/equal}}>December</option>
 				</select>
 				<input type="number" name="closed_to_day_{{@index}}" value="{{to_day}}" min="1" max="31">
+				<input type="number" name="closed_to_year_{{@index}}" value="{{to_year}}">
 				<input type="button" id="delete_{{@index}}" value="x" onClick="delClosed({{@index}});">
 			</td>
 		</tr>
@@ -294,6 +296,7 @@
 					<option value="12">December</option>
 				</select>
 				<input type="number" name="closed_from_day_X" value="1" min="1" max="31">
+				<input type="number" name="closed_from_year_X" value="1">
 				 to 
 				<select name="closed_to_month_X">
 					<option value="1">January</option>
@@ -310,6 +313,7 @@
 					<option value="12">December</option>
 				</select>
 				<input type="number" name="closed_to_day_X" value="1" min="1" max="31">
+				<input type="number" name="closed_to_year_X" value="1">
 				<input type="button" id="delete_X" value="x" onClick="delClosed(X);">
 			</td>
 		</tr>
@@ -338,6 +342,7 @@
 					<option value="12"{{#equal from_month 12}} selected{{/equal}}>December</option>
 				</select>
 				<input type="number" name="from_day_{{@index}}" value="{{from_day}}" min="1" max="31">
+				<input type="number" name="from_year_{{@index}}" value="{{from_year}}">
 				 at 
 				<input type="number" name="from_hour_{{@index}}" value="{{from_hour}}" min="1" max="12"> :
 				<input type="number" name="from_minute_{{@index}}" value="{{from_minute}}" min="0" max="59">
@@ -367,6 +372,7 @@
 					<option value="12"{{#equal to_month 12}} selected{{/equal}}>December</option>
 				</select>
 				<input type="number" name="to_day_{{@index}}" value="{{to_day}}" min="1" max="31">
+				<input type="number" name="to_year_{{@index}}" value="{{to_year}}">
 				 at 
 				<input type="number" name="to_hour_{{@index}}" value="{{to_hour}}" min="1" max="12"> :
 				<input type="number" name="to_minute_{{@index}}" value="{{to_minute}}" min="0" max="59">
@@ -396,6 +402,7 @@
 					<option value="12">December</option>
 				</select>
 				<input type="number" name="from_day_X" value="1" min="1" max="31">
+				<input type="number" name="from_year_X" value="1">
 				 at 
 				<input type="number" name="from_hour_X" value="12" min="1" max="12"> :
 				<input type="number" name="from_minute_X" value="0" min="0" max="59">
@@ -425,6 +432,7 @@
 					<option value="12">December</option>
 				</select>
 				<input type="number" name="to_day_X" value="1" min="1" max="31">
+				<input type="number" name="to_year_X" value="1">
 				 at 
 				<input type="number" name="to_hour_X" value="12" min="1" max="12"> :
 				<input type="number" name="to_minute_X" value="0" min="0" max="59">

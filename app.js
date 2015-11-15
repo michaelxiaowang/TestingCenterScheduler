@@ -44,9 +44,11 @@ app.use(expressSession({
 	saveUninitialized: false
 }));
 
+//initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+//passport serializes/deserializes users for us
 passport.serializeUser(function(user, done) {
 	done(null, user._id);
 });
@@ -71,5 +73,3 @@ var port = process.env.PORT || 3000;
 server.listen(port, function() {
 	console.log("Listening on https://127.0.0.1:" + port);
 });
-
-console.log("Listening on port " + port);

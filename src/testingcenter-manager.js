@@ -11,8 +11,8 @@ exports.updateTCInfo = function(req, args) {
     var i = 0;
     while(req.body["closed_from_month_"+i]) {
         closed[i] = new Object();
-        closed[i].from = new Date(new Date().getFullYear(), req.body["closed_from_month_" +i]-1, req.body["closed_from_day_"   +i]);
-        closed[i].to = new Date(new Date().getFullYear(), req.body["closed_to_month_" +i]-1, req.body["closed_to_day_"   +i]);
+        closed[i].Start = new Date(req.body["closed_from_year_" +i], req.body["closed_from_month_" +i]-1, req.body["closed_from_day_"   +i]);
+        closed[i].End = new Date(req.body["closed_to_year_" +i], req.body["closed_to_month_" +i]-1, req.body["closed_to_day_"   +i]);
         i++;
     }
 
@@ -24,11 +24,11 @@ exports.updateTCInfo = function(req, args) {
         if(req.body["from_ampm_"+i] == 'pm') {
             req.body["from_hour_"+i] = parseInt(req.body["from_hour_"+i]) + 12;
         }
-        reserved[i].from = new Date(new Date().getFullYear(), req.body["from_month_"+i]-1, req.body["from_day_"+i], req.body["from_hour_"+i], req.body["from_minute_"+i]);
+        reserved[i].Start = new Date(req.body["closed_from_year_" +i], req.body["from_month_"+i]-1, req.body["from_day_"+i], req.body["from_hour_"+i], req.body["from_minute_"+i]);
         if(req.body["to_ampm_"+i] == 'pm') {
             req.body["to_hour_"+i] = parseInt(req.body["to_hour_"+i]) + 12;
         }
-        reserved[i].to = new Date(new Date().getFullYear(), req.body["to_month_"+i]-1, req.body["to_day_"+i], req.body["to_hour_"+i], req.body["to_minute_"+i]);
+        reserved[i].End = new Date(req.body["closed_to_year_" +i], req.body["to_month_"+i]-1, req.body["to_day_"+i], req.body["to_hour_"+i], req.body["to_minute_"+i]);
         i++;
 
     }
