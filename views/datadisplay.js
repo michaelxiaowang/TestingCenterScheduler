@@ -158,9 +158,9 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						args.reserved = [];
 						for(i in TC.ReservedDates) {
 							args.reserved.push({from_month: TC.ReservedDates[i].Start.getMonth()+1, from_day: TC.ReservedDates[i].Start.getDate(), from_year: TC.ClosedDates[i].Start.getFullYear(), 
-								from_hour: TC.ReservedDates[i].Start.getHours()%12, from_minute: TC.ReservedDates[i].Start.getMinutes(), from_ampm: ampm(TC.ReservedDates[i].Start.getHours()), 
+								from_hour: msToHour(TC.ReservedDates[i].Start.getHours()), from_minute: TC.ReservedDates[i].Start.getMinutes(), from_ampm: ampm(TC.ReservedDates[i].Start.getHours()), 
 								to_month: TC.ReservedDates[i].End.getMonth()+1, to_day: TC.ReservedDates[i].End.getDate(), to_year: TC.ClosedDates[i].End.getFullYear(), 
-								to_hour: TC.ReservedDates[i].End.getHours()%12, to_minute: TC.ReservedDates[i].End.getMinutes(), to_ampm: ampm(TC.ReservedDates[i].End.getHours())})
+								to_hour: msToHour(TC.ReservedDates[i].End.getHours()), to_minute: TC.ReservedDates[i].End.getMinutes(), to_ampm: ampm(TC.ReservedDates[i].End.getHours())})
 						}
 					}
 					callback();

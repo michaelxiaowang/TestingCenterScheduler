@@ -266,11 +266,12 @@ module.exports = function(app, fs) {
 				break;
 				case "info":
 					//do something with these
-					TM.updateTCInfo(req, args);
-					args.result = "Saved?"; //display result to user
-					DD.makeArgsAdmin(req, args, function() {
-						res.render('frame', args);
-					});	
+					TM.updateTCInfo(req, function(result) {
+						args.result = result;
+						DD.makeArgsAdmin(req, args, function() {
+							res.render('frame', args);
+						});	
+					});
 				break;
 				case "report":
 					var type	= req.body.type; //'day' 'week' 'term' or 'range'
