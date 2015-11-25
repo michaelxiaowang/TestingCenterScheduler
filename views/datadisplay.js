@@ -173,7 +173,20 @@ exports.makeArgsAdmin = function(req, args, callback) {
 		break;
 		case "import": //Import Data
 			args.action = "/admin/import"; //POST action
-			callback();
+			args.termimports = [];
+			testingcenters.find().toArray(function(err, TC) {
+				if(err) {
+					console.log(err);
+				}
+
+				for(i in TC) {
+					//User can only import data for non-"past" terms
+					//if(TC[i].Status != "past") {
+						args.termimports.push({name: TC[i].Name, value: TC[i].Term});
+					//}
+				}
+				callback();
+			});
 		break;
 		case "util": //Display Utilization
 			args.action = "/admin/util";

@@ -3,6 +3,16 @@
 	<form action="{{action}}" method="post" enctype="multipart/form-data">
 	<table id="form">
 		<tr>
+			<td class="left">Term:</td>
+			<td class="right">
+				<select name="termimport">
+					{{#each termimports}}
+						<option value="{{value}}">{{name}}</option>
+					{{/each}}
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td class="left">File:</td>
 			<td class="right"><input name="csvfile" type="file" size="50"></td>
 		</tr>

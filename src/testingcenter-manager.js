@@ -1,3 +1,4 @@
+//Require our db and necessary collections
 var db = require('./db');
 var testingcenters = db.collection('testingcenters');
 

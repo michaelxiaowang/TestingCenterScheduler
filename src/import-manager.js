@@ -1,8 +1,8 @@
-//require modules
+//require node modules
 var fs = require('fs');
 var csv = require('fast-csv');
 
-//require db
+//require db and necessary collections
 var db = require('./db');
 var users = db.collection('users');
 var classes = db.collection('classes');
