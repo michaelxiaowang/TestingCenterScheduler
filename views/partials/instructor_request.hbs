@@ -1,5 +1,30 @@
+{{#if conf}}
+<div id="text">Confirm exam request:</div>
+{{else}}
 <div id="text">Make a request to schedule an exam:</div>
+{{/if}}
 <div id="content">
+	{{#if conf}}
+		<form action="{{action}}" method="post">
+		<table id="form">
+			<tr>
+				<td class="left">Confirm:</td>
+				<td class="right">
+					<select name="confirmation">
+						<option value="confirm">Confirm</option>
+						<option value="cancel">Cancel</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="left"></td>
+				<td class="action">
+					<input type="submit" value="Request">
+				</td>
+			</tr>
+		</table>
+		</form>
+	{{else}}
 	<form action="{{action}}" method="post">
 	<table id="form">
 		<tr>
@@ -141,4 +166,5 @@
 		</tr>
 	</table>
 	</form>
+	{{/if}}
 </div>

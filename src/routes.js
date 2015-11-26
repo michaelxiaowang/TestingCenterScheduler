@@ -14,6 +14,9 @@ var TM = require(path.join(__dirname, 'testingcenter-manager'));
 var AM = require(path.join(__dirname, 'appointment-manager'));
 var EM = require(path.join(__dirname, 'exam-manager'));
 
+var confirm = 0; //We will use this for the confirmation page since it will live outside of http requests
+var examreq; //Used for passing the exam request to confirmation page
+
 module.exports = function(app, fs) {
 	//homepage redirects user to login if not logged in
 	app.get('/', function(req, res) {
@@ -181,11 +184,26 @@ module.exports = function(app, fs) {
 					}); 
 				break;
 				case "request":
-					EM.createExam(req, function(result) {
-						args.result = result;
-						DD.makeArgsInstructor(req, args);
-						res.render('frame', args);
-					});
+					//Confirm being 0 means we are not on the confirm page, we are on request page
+					if(confirm == 0) {
+						EM.createExam(req, function(result, exam) {
+							if(exam == null) {
+								args.result = result;
+							} else {
+								examreq = exam;
+								args.conf = "The utilization is ";
+								confirm = args.conf;
+							}
+							DD.makeArgsInstructor(req, args);
+							res.render('frame', args);
+						});
+					} else { //We are on confirm page
+						EM.confirmPendingExam(examreq, function(result) {
+							args.result = result;
+							DD.makeArgsInstructor(req, args);
+							res.render('frame', args);
+						});
+					}
 				break;
 			}
 		}
