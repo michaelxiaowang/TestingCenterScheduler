@@ -282,8 +282,9 @@ exports.makeArgsAdmin = function(req, args, callback) {
 		break;
 	}
 }
+
 //Make the arguments which contain the data to display to instructors
-exports.makeArgsInstructor = function(req, args) {
+exports.makeArgsInstructor = function(req, args, callback) {
 	switch(req.params.value) {
 		case "attendance": //Show the exams the instructor has/has requested
 			args.action = "/instructor/attendance"; //POST action
@@ -297,6 +298,7 @@ exports.makeArgsInstructor = function(req, args) {
 						args.exams.push({name: examArray[i].examID, value: examArray[i].examID});
 					}
 				}
+				return callback(args);
 			});
 		break;
 		case "cancel": //Show the exams the instructor has/has requested
@@ -307,13 +309,17 @@ exports.makeArgsInstructor = function(req, args) {
 					console.log(err);
 				}
 				for(i in examArray) {
-					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
-						args.exams.push({name: examArray[i].examID, value: examArray[i].examID});
+					//Only display in cancel list if pending
+					if(examArray[i].status == 'pending') {
+						if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
+							args.exams.push({name: examArray[i].examID, value: examArray[i].examID});
+						}
 					}
 				}
 				if (args.exams[req.query.exam]) {
 					args.exams[req.query.exam].selected = true;
 				}
+				return callback(args);
 			});
 		break;
 		case "list": //Display a list of exams
@@ -324,8 +330,8 @@ exports.makeArgsInstructor = function(req, args) {
 				}
 				//look for this instructors' exams
 				for(i in examArray) {
-					//Push the fields to display to user
-					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1) {
+					//Push the fields to display to user if this exam period has not ended
+					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1 && (new Date().getTime()) < examArray[i].endDate.getTime() + examArray[i].endTime) {
 						if(examArray[i].status == 'approved') 	
 							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToTime(examArray[i].startTime), 
 							end: prettyDate(examArray[i].endDate) + " at " + msToTime(examArray[i].endTime), status: examArray[i].status, 
@@ -336,12 +342,14 @@ exports.makeArgsInstructor = function(req, args) {
 							scheduled: 0, taken: 0, cancel:"/instructor/cancel?exam=" + i});
 					}
 				}
+				return callback(args);
 			})
 		break;
 		case "request":
 			args.action	= "/instructor/request"; //POST action
-			////instantiate the args.classes array and get the class objects in an array
+			//instantiate the args.courses array and get the class objects in an array
 			args.courses = [];
+			//Find all the testing centers
 			classes.find().toArray(function(err, classArray) {
 				if(err) {
 					console.log(err);
@@ -353,18 +361,19 @@ exports.makeArgsInstructor = function(req, args) {
 					}
 				}
 				args.courses.sort();
-			});
-			//instantiate the args.terms array and get the testing centers objects in an array
-			args.terms = [];
-			testingcenters.find().toArray(function(err, tcenters) {
-				if(err) {
-					console.log(err);
-				}
-				//Add each term to the term dropbox
-				for(i in tcenters) {
-					args.terms.push({name: tcenters[i].Term, value: tcenters[i].Term});
-				}
-				args.terms.sort();
+				//instantiate the args.terms array and get the testing centers objects in an array
+				args.terms = [];
+				testingcenters.find().toArray(function(err, tcenters) {
+					if(err) {
+						console.log(err);
+					}
+					//Add each term to the term dropbox
+					for(i in tcenters) {
+						args.terms.push({name: tcenters[i].Term, value: tcenters[i].Term});
+					}
+					args.terms.sort();
+					return callback(args);
+				});
 			});
 		break;
 	}

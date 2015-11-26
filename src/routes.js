@@ -148,8 +148,9 @@ module.exports = function(app, fs) {
 				partial: "instructor_" + req.params.value,
 				logout: true,
 			};
-			DD.makeArgsInstructor(req, args);
-			res.render('frame', args);
+			DD.makeArgsInstructor(req, args, function() {
+				res.render('frame', args);
+			});	
 		}
 	});
 
@@ -170,17 +171,19 @@ module.exports = function(app, fs) {
 			};
 			switch(req.params.value) {
 				case "attendance":
-					DD.viewAttendance(req, args, function() {
-						DD.makeArgsInstructor(req, args);
-						res.render('frame', args);
+					DD.viewAttendance(req, args, function(args) {
+						DD.makeArgsInstructor(req, args, function(args) {
+							res.render('frame', args);
+						});
 					})
 				break;
 				case "cancel":
 					//do something with this
 					EM.removePendingExam(req, function(result) {
 						args.result = result; //display result to user
-						DD.makeArgsInstructor(req, args);
-						res.render('frame', args);
+						DD.makeArgsInstructor(req, args, function(args) {
+							res.render('frame', args);
+						});
 					}); 
 				break;
 				case "request":
@@ -194,14 +197,16 @@ module.exports = function(app, fs) {
 								args.conf = "The utilization is ";
 								confirm = args.conf;
 							}
-							DD.makeArgsInstructor(req, args);
-							res.render('frame', args);
+							DD.makeArgsInstructor(req, args, function(args) {
+								res.render('frame', args);
+							});
 						});
 					} else { //We are on confirm page
 						EM.confirmPendingExam(examreq, function(result) {
 							args.result = result;
-							DD.makeArgsInstructor(req, args);
-							res.render('frame', args);
+							DD.makeArgsInstructor(req, args, function(args) {
+								res.render('frame', args);
+							});
 						});
 					}
 				break;
