@@ -171,8 +171,8 @@ module.exports = function(app, fs) {
 			};
 			switch(req.params.value) {
 				case "attendance":
-					DD.viewAttendance(req, args, function(args) {
-						DD.makeArgsInstructor(req, args, function(args) {
+					DD.makeArgsInstructor(req, args, function(args) {
+						DD.viewAttendance(req, args, function(args) {
 							res.render('frame', args);
 						});
 					})

@@ -459,7 +459,7 @@ exports.viewAttendance = function(req, args, callback) {
 			args.data.push({student: appointmentArray[i].student, time: prettyDate(appointmentArray[i].day) + " at " + msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), 
 				seat: "assigned seat", present: appointmentArray[i].attended});
 		}
-		callback();
+		callback(args);
 	})
 }
 
