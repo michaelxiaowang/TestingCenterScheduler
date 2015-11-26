@@ -46,11 +46,11 @@ exports.updateTCInfo = function(req, callback) {
         if(req.body["from_ampm_"+i] == 'pm') {
             req.body["from_hour_"+i] = parseInt(req.body["from_hour_"+i]) + 12;
         }
-        reserved[i].Start = new Date(req.body["closed_from_year_" +i], req.body["from_month_"+i]-1, req.body["from_day_"+i], req.body["from_hour_"+i], req.body["from_minute_"+i]);
+        reserved[i].Start = new Date(req.body["from_year_"+i], req.body["from_month_"+i]-1, req.body["from_day_"+i], req.body["from_hour_"+i], req.body["from_minute_"+i]);
         if(req.body["to_ampm_"+i] == 'pm') {
             req.body["to_hour_"+i] = parseInt(req.body["to_hour_"+i]) + 12;
         }
-        reserved[i].End = new Date(req.body["closed_to_year_" +i], req.body["to_month_"+i]-1, req.body["to_day_"+i], req.body["to_hour_"+i], req.body["to_minute_"+i]);
+        reserved[i].End = new Date(req.body["to_year_"+i], req.body["to_month_"+i]-1, req.body["to_day_"+i], req.body["to_hour_"+i], req.body["to_minute_"+i]);
         //Check to see if the end time is earlier than or equal the start time
         if(reserved[i].End <= reserved[i].Start) {
             return callback("FAILED: at least one of the reserved date ranges has an end time that is earlier or equal to the start time.");
