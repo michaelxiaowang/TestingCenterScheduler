@@ -8,6 +8,11 @@ var testingcenters = db.collection('testingcenters');
 For duplicate terms, the newest one will replace previous versions*/
 exports.updateTCInfo = function(req, callback) {
 
+    //If name field is empty reject the update
+    if(req.body.name == null || req.body.name.match(/^\s*$/)) {
+        return callback("FAILED: Must have name field.");
+    }
+
     //If any of the weeks operating hours has a end time earlier than the start time
     if(hourToMS(req.body.from_hour_mon, req.body.from_minute_mon, req.body.from_ampm_mon) > hourToMS(req.body.to_hour_mon, req.body.to_minute_mon, req.body.to_ampm_mon) ||
         hourToMS(req.body.from_hour_tue, req.body.from_minute_tue, req.body.from_ampm_tue) > hourToMS(req.body.to_hour_tue, req.body.to_minute_tue, req.body.to_ampm_tue) ||
@@ -98,7 +103,17 @@ exports.updateTCInfo = function(req, callback) {
 
                     //Can't edit past terms
                     if(req.body.termstatus == "past") {
-                        return callback('FAILED: Cannot edit a past term.');
+                        if(tctermbyterm != null && tctermbyterm.Status == "past") {
+                            return callback('FAILED: Cannot edit a past term.');
+                        } else if(tctermbyterm == null) {
+                            return callback('FAILED: Cannot create a past term.');
+                        }
+                        testingcenters.update({
+                            Term: req.body.term
+                        }, {
+                            $set: {Status: "past"}
+                        });
+                        callback("SUCCESS: Updated Term Info.");
                     } else if(req.body.termstatus == "current") {
                         //if status is current, check to make sure the current term is the one being updated
                         testingcenters.findOne({Status: "current"}, function(err, currentterm) {
@@ -116,7 +131,7 @@ exports.updateTCInfo = function(req, callback) {
                                 });
                                 callback("SUCCESS: Updated Term Info.");
                             }   
-                        })
+                        });
                     } else { //must be future
                         testingcenters.update({
                             Term: req.body.term
