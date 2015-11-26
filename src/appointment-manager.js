@@ -10,7 +10,7 @@ exports.studentCreateAppointment = function(req, callback) {
 		if(err) {
 			console.log(err);
 		}
-		var date = new Date((new Date).getFullYear(), req.body.month-1, req.body.day);
+		var date = new Date(req.body.year, req.body.month-1, req.body.day);
 		if(req.body.ampm == 'pm') {
 			req.body.hour += 12;
 		}

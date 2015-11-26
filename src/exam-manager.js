@@ -11,8 +11,8 @@ exports.createExam = function(req, callback) {
 	
 	//Set the variables related to exam term and time
 	var term = req.body.term;
-	var startDate = new Date(req.body.start_month + " " + req.body.start_day + ", " + (new Date).getFullYear().toString());
-	var endDate = new Date(req.body.end_month + " " + req.body.end_day + ", " + (new Date).getFullYear().toString());
+	var startDate = new Date(req.body.start_month + " " + req.body.start_day + ", " + req.body.start_year);
+	var endDate = new Date(req.body.end_month + " " + req.body.end_day + ", " + req.body.end_year);
 	var startTime = parseInt(req.body.start_hour) * 3600000 + parseInt(req.body.start_minute) * 60000;
 	if(req.body.start_ampm == 'pm') {
 		startTime += 43200000;
@@ -119,10 +119,14 @@ exports.createExam = function(req, callback) {
 }
 
 //Confirm a pending exam request
-exports.confirmPendingExam = function(exam, callback) {
-	exams.insert(exam, function(err, doc) {
-		return callback("SUCCESS: Created exam request");
-	});
+exports.confirmPendingExam = function(req, exam, callback) {
+	if(req.body.confirmation == "confirm") {
+		exams.insert(exam, function(err, doc) {
+			return callback("SUCCESS: Created exam request.");
+		});
+	} else {
+		return callback("Did not submit request.");
+	}
 }
 
 //Remove a pending exam request

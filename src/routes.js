@@ -202,9 +202,11 @@ module.exports = function(app, fs) {
 							});
 						});
 					} else { //We are on confirm page
-						EM.confirmPendingExam(examreq, function(result) {
+						EM.confirmPendingExam(req, examreq, function(result) {
 							args.result = result;
 							DD.makeArgsInstructor(req, args, function(args) {
+								confirm = 0;
+								examreq = null;
 								res.render('frame', args);
 							});
 						});

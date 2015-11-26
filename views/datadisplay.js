@@ -332,17 +332,21 @@ exports.makeArgsInstructor = function(req, args, callback) {
 					console.log(err);
 				}
 				//look for this instructors' exams
+				var cancelnum = 0; //This assigns the cancel queries
 				for(i in examArray) {
 					//Push the fields to display to user if this exam period has not ended
 					if(examArray[i].Instructors.indexOf(req.user.NetID) > -1 && (new Date().getTime()) < examArray[i].endDate.getTime() + examArray[i].endTime) {
-						if(examArray[i].status == 'approved') 	
+						if(examArray[i].status == 'approved') {
 							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToTime(examArray[i].startTime), 
 							end: prettyDate(examArray[i].endDate) + " at " + msToTime(examArray[i].endTime), status: examArray[i].status, 
 							scheduled: 0, taken: 0});
-						else
+						}
+						else {
 							args.data.push({exam: examArray[i].examID, start: prettyDate(examArray[i].startDate) + " at " + msToTime(examArray[i].startTime), 
 							end: prettyDate(examArray[i].endDate) + " at " + msToTime(examArray[i].endTime), status: examArray[i].status, 
-							scheduled: 0, taken: 0, cancel:"/instructor/cancel?exam=" + i});
+							scheduled: 0, taken: 0, cancel:"/instructor/cancel?exam=" + cancelnum});
+							cancelnum++;
+						}
 					}
 				}
 				return callback(args);
