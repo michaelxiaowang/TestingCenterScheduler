@@ -9,7 +9,7 @@ For duplicate terms, the newest one will replace previous versions*/
 exports.updateTCInfo = function(req, callback) {
 
     //If name field is empty reject the update
-    if(req.body.name == null || req.body.name.match(/^\s*$/)) {
+    if(req.body.termname == null || req.body.termname.match(/^\s*$/)) {
         return callback("FAILED: Must have name field.");
     }
 
