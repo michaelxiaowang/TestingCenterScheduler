@@ -93,6 +93,16 @@
 			</td>
 		</tr>
 		<tr>
+			<td class="left">Term Status:</td>
+			<td class="right">
+				<select name="termstatus">
+					<option value="past"{{#equal termstatus "past"}} selected{{/equal}}>Past</option>
+					<option value="current"{{#equal termstatus "current"}} selected{{/equal}}>Current</option>
+					<option value="future"{{#equal termstatus "future"}} selected{{/equal}}>Future</option>
+				</select> 
+			</td>
+		</tr>
+		<tr>
 			<td class="left">Number of Seats:</td>
 			<td class="right">
 				<input type="number" name="seats" value="{{seats}}"> seats

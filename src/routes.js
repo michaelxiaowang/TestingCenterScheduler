@@ -258,11 +258,12 @@ module.exports = function(app, fs) {
 					});
 				break;
 				case "import":
-					var uploadStatus = IM.upload(req, res);
-					args.result = uploadStatus; //display result to user
-					DD.makeArgsAdmin(req, args, function() {
-						res.render('frame', args);
-					});	
+					IM.upload(req, res, function(result) {
+						args.result = result; //display result to user
+						DD.makeArgsAdmin(req, args, function() {
+							res.render('frame', args);
+						});	
+					});
 				break;
 				case "info":
 					//do something with these

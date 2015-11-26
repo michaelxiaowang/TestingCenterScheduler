@@ -23,6 +23,7 @@ exports.makeArgsAdmin = function(req, args, callback) {
 					if(TC == null) { //If TC with the term cannot be found, display default info
 						args.term		= req.query.term; //term number
 						args.termname	= "" //term display name
+						args.termstatus = "future"; //term status
 						args.action		= "/admin/info"; //POST action
 						args.seats		= 64; //current setting for # of total seats
 						args.sas		= 8; //current setting for # of set-aside seats
@@ -94,6 +95,7 @@ exports.makeArgsAdmin = function(req, args, callback) {
 					} else { //Display this term's current info
 						args.term = TC.Term;
 						args.termname = TC.Name;
+						args.termstatus = TC.Status;
 						args.action		= "/admin/info"; //POST action
 						args.seats		= TC.numSeats; //current setting for # of total seats
 						args.sas		= TC.numSetAside; //current setting for # of set-aside seats

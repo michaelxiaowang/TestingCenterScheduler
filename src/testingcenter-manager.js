@@ -9,14 +9,14 @@ For duplicate terms, the newest one will replace previous versions*/
 exports.updateTCInfo = function(req, callback) {
 
     //If any of the weeks operating hours has a end time earlier than the start time
-    if(hourToMS(req.body.from_hour_mon, req.body.from_minute_mon, req.body.from_ampm_mon) <= hourToMS(req.body.to_hour_mon, req.body.to_minute_mon, req.body.to_ampm_mon) ||
-        hourToMS(req.body.from_hour_tue, req.body.from_minute_tue, req.body.from_ampm_tue) <= hourToMS(req.body.to_hour_tue, req.body.to_minute_tue, req.body.to_ampm_tue) ||
-        hourToMS(req.body.from_hour_wed, req.body.from_minute_wed, req.body.from_ampm_wed) <= hourToMS(req.body.to_hour_wed, req.body.to_minute_wed, req.body.to_ampm_wed) ||
-        hourToMS(req.body.from_hour_thu, req.body.from_minute_thu, req.body.from_ampm_thu) <= hourToMS(req.body.to_hour_thu, req.body.to_minute_thu, req.body.to_ampm_thu) ||
-        hourToMS(req.body.from_hour_fri, req.body.from_minute_fri, req.body.from_ampm_fri) <= hourToMS(req.body.to_hour_fri, req.body.to_minute_fri, req.body.to_ampm_fri) ||
-        hourToMS(req.body.from_hour_sat, req.body.from_minute_sat, req.body.from_ampm_sat) <= hourToMS(req.body.to_hour_sat, req.body.to_minute_sat, req.body.to_ampm_sat) ||
-        hourToMS(req.body.from_hour_sun, req.body.from_minute_sun, req.body.from_ampm_sun) <= hourToMS(req.body.to_hour_sun, req.body.to_minute_sun, req.body.to_ampm_sun)) {
-        return callback("FAILED: at least one of the operating hour time ranges has end time before or equal to the start time.");
+    if(hourToMS(req.body.from_hour_mon, req.body.from_minute_mon, req.body.from_ampm_mon) > hourToMS(req.body.to_hour_mon, req.body.to_minute_mon, req.body.to_ampm_mon) ||
+        hourToMS(req.body.from_hour_tue, req.body.from_minute_tue, req.body.from_ampm_tue) > hourToMS(req.body.to_hour_tue, req.body.to_minute_tue, req.body.to_ampm_tue) ||
+        hourToMS(req.body.from_hour_wed, req.body.from_minute_wed, req.body.from_ampm_wed) > hourToMS(req.body.to_hour_wed, req.body.to_minute_wed, req.body.to_ampm_wed) ||
+        hourToMS(req.body.from_hour_thu, req.body.from_minute_thu, req.body.from_ampm_thu) > hourToMS(req.body.to_hour_thu, req.body.to_minute_thu, req.body.to_ampm_thu) ||
+        hourToMS(req.body.from_hour_fri, req.body.from_minute_fri, req.body.from_ampm_fri) > hourToMS(req.body.to_hour_fri, req.body.to_minute_fri, req.body.to_ampm_fri) ||
+        hourToMS(req.body.from_hour_sat, req.body.from_minute_sat, req.body.from_ampm_sat) > hourToMS(req.body.to_hour_sat, req.body.to_minute_sat, req.body.to_ampm_sat) ||
+        hourToMS(req.body.from_hour_sun, req.body.from_minute_sun, req.body.from_ampm_sun) > hourToMS(req.body.to_hour_sun, req.body.to_minute_sun, req.body.to_ampm_sun)) {
+        return callback("FAILED: at least one of the operating hour time ranges has end time before the start time.");
     }
 
     //Check for valid closed dates
@@ -56,30 +56,28 @@ exports.updateTCInfo = function(req, callback) {
     //Valid gap time is checked by the form
 
     //Check if a testing center with this term name already exists
-    testingcenters.findOne({Name: req.body.termname}, function(err, tcterm) {
+    testingcenters.findOne({Name: req.body.termname}, function(err, tctermbyname) {
         if(err) {
             console.log(err);
         }
         //If the term and name are both equal, it must be the same term
         //But if not, then you cannot have duplicate term names
-        if(tcterm != null && tcterm.Name.toUpperCase() == req.body.termname.toUpperCase() && tcterm.Term != req.body.term) {
-            return callback("A term with this name already exists with a different term number.");
+        if(tctermbyname != null && tctermbyname.Name.toUpperCase() == req.body.termname.toUpperCase() && tctermbyname.Term != req.body.term) {
+            return callback("FAILED: A term with this name already exists with a different term number.");
         } else {
-            testingcenters.findOne({Term: req.body.term}, function(err, tcterm) {
+            testingcenters.findOne({Term: req.body.term}, function(err, tctermbyterm) {
                 if(err) {
                     console.log(err);
                 }
-                //We already checked if there was a term with the same term number & term , if it reaches here then there isn't
-                //Now we check if there is already a term with this term number
-                if(tcterm != null) {
-                    return callback("A term with this term number already exists with a different term name.");
+                //Check if there is a term with this term number that doesn't have this name
+                if(tctermbyterm != null && tctermbyterm.Name.toUpperCase() != req.body.termname.toUpperCase() && tctermbyterm.Term == req.body.term) {
+                    return callback("FAILED: A term with this term number already exists with a different term name.");
                 } else {
-                    //This must be an update or new term
-                    testingcenters.update({
-                        Term: req.body.term
-                    },{
+                    //make testing center object
+                    updatedTC = {
                         Term: req.body.term,
                         Name: req.body.termname,
+                        Status: req.body.termstatus,
                         numSeats: req.body.seats,
                         numSetAside: req.body.sas, //set-aside seats
                         gapTime: req.body.gap,
@@ -96,10 +94,37 @@ exports.updateTCInfo = function(req, callback) {
                         ClosedDates: closed,
                         ReservedDates: reserved,
                         ReminderInterval: req.body.reminder, //interval
-                    },{
-                        upsert: true
-                    });
-                    callback("SUCCESS: Updated Term Info.");
+                    }
+
+                    //Can't edit past terms
+                    if(req.body.termstatus == "past") {
+                        return callback('FAILED: Cannot edit a past term.');
+                    } else if(req.body.termstatus == "current") {
+                        //if status is current, check to make sure the current term is the one being updated
+                        testingcenters.findOne({Status: "current"}, function(err, currentterm) {
+                            if(err) {
+                                console.log("err");
+                            }
+                            //if it isn't an update
+                            if(currentterm != null && currentterm.Term != req.body.term) {
+                                return callback("A different term already exists as the current term");
+                            } else {
+                                testingcenters.update({
+                                    Term: req.body.term
+                                }, updatedTC, {
+                                    upsert: true
+                                });
+                                callback("SUCCESS: Updated Term Info.");
+                            }   
+                        })
+                    } else { //must be future
+                        testingcenters.update({
+                            Term: req.body.term
+                        }, updatedTC, {
+                            upsert: true
+                        });
+                        callback("SUCCESS: Updated Term Info.");
+                    }
                 }
             });
         }

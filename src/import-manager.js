@@ -9,14 +9,14 @@ var classes = db.collection('classes');
 var roster = db.collection('roster');
 var appointments = db.collection('appointments'); //used to update superfluous appointments
 
-exports.upload = function(req, res) {
+exports.upload = function(req, res, callback) {
 	//if no file is selected, req.file is null, we will inform the user
 	if(req.file == null) {
-		return "No file was selected.";
+		return callback("No file was selected.");
 	}
-	//checks to see if file is not a csv file
-	if(req.file.mimetype != 'text/csv') {
-		return "Not a valid csv file."
+	//checks to see if file has csv extension
+	if(req.file.originalname.indexOf('.csv') == -1) {
+		return callback("File does not have .csv extension.");
 	} else {
 		var stream = fs.createReadStream(req.file.path);
 		
@@ -25,7 +25,7 @@ exports.upload = function(req, res) {
 		if(req.file.originalname == "user.csv") {
 			var csvStream = csv
 				.fromStream(stream, {
-					headers : true,
+					headers: true,
 					discardUnmappedColumns: true
 				})
 			    .on("data", function(data){
@@ -44,15 +44,15 @@ exports.upload = function(req, res) {
 			        });
 			    })
 			    .on("end", function(){
-			         return "Upload completed.";
+			         return callback("Upload completed.");
 		    	});
 		} else if(req.file.originalname == "class.csv") {
 			var csvStream = csv
 				.fromStream(stream, {
 					headers : true,
-					discardUnmappedColumns: true
+					discardUnmappedColumns: true,
 				})
-			    .on("data", function(data){
+			    .on("data", function(data) {
 			    	classes.update({
 			        	ClassID : data.ClassID
 			        },{
@@ -78,7 +78,7 @@ exports.upload = function(req, res) {
 			        });
 			    })
 			    .on("end", function(){
-			         return "Upload completed.";
+			         return callback("Upload completed.");
 		    	});
 		} else if(req.file.originalname == "roster.csv") {
 			var csvStream = csv
@@ -96,10 +96,10 @@ exports.upload = function(req, res) {
 			        });
 			    })
 			    .on("end", function(){
-			         return "Upload completed.";
+			         return callback("Upload completed.");
 		    	});
 		} else {
-			return "Only accepts csv files with name 'user.csv', 'class.csv', or 'roster.csv'.";
+			return callback("Only accepts csv files with name 'user.csv', 'class.csv', or 'roster.csv'.");
 		}
 	}
 	
