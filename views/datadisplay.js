@@ -232,11 +232,14 @@ exports.makeArgsAdmin = function(req, args, callback) {
 		break;
 		case "add": //Add Appointment
 			args.action = "/admin/add"; //POST action
-			args.courses= [
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-				{name:"course Display Name", value:"course POST value"},
-			];
+			if (req.query.student) {
+				args.student = req.query.student;
+				args.courses= [
+					{name:"course Display Name", value:"course POST value"},
+					{name:"course Display Name", value:"course POST value"},
+					{name:"course Display Name", value:"course POST value"},
+				];
+			}
 			callback();
 		break;
 		case "list": //Appointment List
@@ -349,12 +352,12 @@ exports.makeArgsInstructor = function(req, args, callback) {
 			args.action	= "/instructor/request"; //POST action
 			//instantiate the args.courses array and get the class objects in an array
 			args.courses = [];
-			//Find all the testing centers
+			//Find all the classes
 			classes.find().toArray(function(err, classArray) {
 				if(err) {
 					console.log(err);
 				}
-				//Add each class to the term dropbox
+				//Add each class this instructor teaches to the term dropbox
 				for(i in classArray) {
 					if(classArray[i].Instructors.indexOf(req.user.NetID) > -1) {
 						args.courses.push({name: classArray[i].Class, value: classArray[i].Class});
@@ -367,9 +370,11 @@ exports.makeArgsInstructor = function(req, args, callback) {
 					if(err) {
 						console.log(err);
 					}
-					//Add each term to the term dropbox
+					//Add each non-past term to the term dropbox
 					for(i in tcenters) {
-						args.terms.push({name: tcenters[i].Term, value: tcenters[i].Term});
+						if(tcenters[i].Status != "past") {
+							args.terms.push({name: tcenters[i].Term, value: tcenters[i].Term});
+						}
 					}
 					args.terms.sort();
 					return callback(args);

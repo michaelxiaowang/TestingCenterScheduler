@@ -1,11 +1,11 @@
 <div id="text">Add an appointment on behalf of a student:</div>
 <div id="content">
+	<form action="/admin/add" method="get">
+	Student NetID: <input type="text" name="student" value="{{student}}"> <input type="submit" value="Edit">
+	</form>
+	{{#if student}}
 	<form action="{{action}}" method="post">
 	<table id="form">
-		<tr>
-			<td class="left">StudentID:</td>
-			<td class="right"><input name="studentid" type="text"></td>
-		</tr>
 		<tr>
 			<td class="left">Course:</td>
 			<td class="right">
@@ -13,6 +13,15 @@
 					{{#each courses}}
 						<option value="{{value}}">{{name}}</option>
 					{{/each}}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="left">Seat Type:</td>
+			<td class="right">
+				<select name="seattype">
+					<option value="normal">Normal</option>
+					<option value="setaside">Set-Aside</option>
 				</select>
 			</td>
 		</tr>
@@ -34,6 +43,7 @@
 					<option value="12">December</option>
 				</select>
 				<input type="number" name="day" value="1" min="1" max="31">
+				<input type="number" name="year" value="2015">
 			</td>
 		</tr>
 		<tr>
@@ -55,4 +65,5 @@
 		</tr>
 	</table>
 	</form>
+	{{/if}}
 </div>

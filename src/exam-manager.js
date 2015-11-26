@@ -48,7 +48,7 @@ exports.createExam = function(req, callback) {
 	//If not adhoc
 	if(!adhoc) {
 		//If the name field is empty, inform user
-		if(req.body.name[0] == "") {
+		if(req.body.name[0] == null || req.body.name[0].match(/^\s*$/)) {
 				return callback("FAILED: Must have Exam Name field", null);
 		}
 		//Find a course with the course name
@@ -86,7 +86,7 @@ exports.createExam = function(req, callback) {
 		});
 	} else { //is adhoc
 		//If the name field is empty, inform user
-		if(req.body.name[1] == "") {
+		if(req.body.name[1] == null || req.body.name[1].match(/^\s*$/)) {
 				return callback("FAILED: Must have Exam Name field", null);
 		}
 		var ClassID = "adhoc"; //ClassID is adhoc
