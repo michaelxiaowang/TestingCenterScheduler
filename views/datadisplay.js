@@ -101,55 +101,55 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						args.sas		= TC.numSetAside; //current setting for # of set-aside seats
 						args.gap = TC.gapTime;
 						args.reminder = TC.ReminderInterval;
+						//sunday
+						args.from_hour_sun	= msToHour(TC.OperatingHours[0][0]);
+						args.from_minute_sun= Math.floor((TC.OperatingHours[0][0]%3600000)/60000);
+						args.from_ampm_sun	= ampm(TC.OperatingHours[0][0]);
+						args.to_hour_sun	= msToHour(TC.OperatingHours[0][1]);
+						args.to_minute_sun	= Math.floor((TC.OperatingHours[0][1]%3600000)/60000);
+						args.to_ampm_sun	= ampm(TC.OperatingHours[0][1]);
 						//monday
-						args.from_hour_mon	= msToHour(TC.OperatingHours.Monday[0]);
-						args.from_minute_mon= Math.floor((TC.OperatingHours.Monday[0]%3600000)/60000);
-						args.from_ampm_mon	= ampm(TC.OperatingHours.Monday[0]);
-						args.to_hour_mon	= msToHour(TC.OperatingHours.Monday[1]);
-						args.to_minute_mon	= Math.floor((TC.OperatingHours.Monday[1]%3600000)/60000);
-						args.to_ampm_mon	= ampm(TC.OperatingHours.Monday[1]);
+						args.from_hour_mon	= msToHour(TC.OperatingHours[1][0]);
+						args.from_minute_mon= Math.floor((TC.OperatingHours[1][0]%3600000)/60000);
+						args.from_ampm_mon	= ampm(TC.OperatingHours[1][0]);
+						args.to_hour_mon	= msToHour(TC.OperatingHours[1][1]);
+						args.to_minute_mon	= Math.floor((TC.OperatingHours[1][1]%3600000)/60000);
+						args.to_ampm_mon	= ampm(TC.OperatingHours[1][1]);
 						//tuesday
-						args.from_hour_tue	= msToHour(TC.OperatingHours.Tuesday[0]);
-						args.from_minute_tue= Math.floor((TC.OperatingHours.Tuesday[0]%3600000)/60000);
-						args.from_ampm_tue	= ampm(TC.OperatingHours.Tuesday[0]);
-						args.to_hour_tue	= msToHour(TC.OperatingHours.Tuesday[1]);
-						args.to_minute_tue	= Math.floor((TC.OperatingHours.Tuesday[1]%3600000)/60000);
-						args.to_ampm_tue	= ampm(TC.OperatingHours.Tuesday[1]);
+						args.from_hour_tue	= msToHour(TC.OperatingHours[2][0]);
+						args.from_minute_tue= Math.floor((TC.OperatingHours[2][0]%3600000)/60000);
+						args.from_ampm_tue	= ampm(TC.OperatingHours[2][0]);
+						args.to_hour_tue	= msToHour(TC.OperatingHours[2][1]);
+						args.to_minute_tue	= Math.floor((TC.OperatingHours[2][1]%3600000)/60000);
+						args.to_ampm_tue	= ampm(TC.OperatingHours[2][1]);
 						//wednesday
-						args.from_hour_wed	= msToHour(TC.OperatingHours.Wednesday[0]);
-						args.from_minute_wed= Math.floor((TC.OperatingHours.Wednesday[0]%3600000)/60000);
-						args.from_ampm_wed	= ampm(TC.OperatingHours.Wednesday[0]);
-						args.to_hour_wed	= msToHour(TC.OperatingHours.Wednesday[1]);
-						args.to_minute_wed	= Math.floor((TC.OperatingHours.Wednesday[1]%3600000)/60000);
-						args.to_ampm_wed	= ampm(TC.OperatingHours.Wednesday[1]);
+						args.from_hour_wed	= msToHour(TC.OperatingHours[3][0]);
+						args.from_minute_wed= Math.floor((TC.OperatingHours[3][0]%3600000)/60000);
+						args.from_ampm_wed	= ampm(TC.OperatingHours[3][0]);
+						args.to_hour_wed	= msToHour(TC.OperatingHours[3][1]);
+						args.to_minute_wed	= Math.floor((TC.OperatingHours[3][1]%3600000)/60000);
+						args.to_ampm_wed	= ampm(TC.OperatingHours[3][1]);
 						//thursday
-						args.from_hour_thu	= msToHour(TC.OperatingHours.Thursday[0]);
-						args.from_minute_thu= Math.floor((TC.OperatingHours.Thursday[0]%3600000)/60000);
-						args.from_ampm_thu	= ampm(TC.OperatingHours.Thursday[0]);
-						args.to_hour_thu	= msToHour(TC.OperatingHours.Thursday[1]);
-						args.to_minute_thu	= Math.floor((TC.OperatingHours.Thursday[1]%3600000)/60000);
-						args.to_ampm_thu	= ampm(TC.OperatingHours.Thursday[1]);
+						args.from_hour_thu	= msToHour(TC.OperatingHours[4][0]);
+						args.from_minute_thu= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
+						args.from_ampm_thu	= ampm(TC.OperatingHours[4][0]);
+						args.to_hour_thu	= msToHour(TC.OperatingHours[4][1]);
+						args.to_minute_thu	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
+						args.to_ampm_thu	= ampm(TC.OperatingHours[4][1]);
 						//friday
-						args.from_hour_fri	= msToHour(TC.OperatingHours.Friday[0]);
-						args.from_minute_fri= Math.floor((TC.OperatingHours.Friday[0]%3600000)/60000);
-						args.from_ampm_fri	= ampm(TC.OperatingHours.Friday[0]);
-						args.to_hour_fri	= msToHour(TC.OperatingHours.Friday[1]);
-						args.to_minute_fri	= Math.floor((TC.OperatingHours.Friday[1]%3600000)/60000);
-						args.to_ampm_fri	= ampm(TC.OperatingHours.Friday[1]);
+						args.from_hour_fri	= msToHour(TC.OperatingHours[4][0]);
+						args.from_minute_fri= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
+						args.from_ampm_fri	= ampm(TC.OperatingHours[4][0]);
+						args.to_hour_fri	= msToHour(TC.OperatingHours[4][1]);
+						args.to_minute_fri	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
+						args.to_ampm_fri	= ampm(TC.OperatingHours[4][1]);
 						//saturday
-						args.from_hour_sat	= msToHour(TC.OperatingHours.Saturday[0]);
-						args.from_minute_sat= Math.floor((TC.OperatingHours.Saturday[0]%3600000)/60000);
-						args.from_ampm_sat	= ampm(TC.OperatingHours.Saturday[0]);
-						args.to_hour_sat	= msToHour(TC.OperatingHours.Saturday[1]);
-						args.to_minute_sat	= Math.floor((TC.OperatingHours.Saturday[1]%3600000)/60000);
-						args.to_ampm_sat	= ampm(TC.OperatingHours.Saturday[1]);
-						//monday
-						args.from_hour_sun	= msToHour(TC.OperatingHours.Sunday[0]);
-						args.from_minute_sun= Math.floor((TC.OperatingHours.Sunday[0]%3600000)/60000);
-						args.from_ampm_sun	= ampm(TC.OperatingHours.Sunday[0]);
-						args.to_hour_sun	= msToHour(TC.OperatingHours.Sunday[1]);
-						args.to_minute_sun	= Math.floor((TC.OperatingHours.Sunday[1]%3600000)/60000);
-						args.to_ampm_sun	= ampm(TC.OperatingHours.Sunday[1]);
+						args.from_hour_sat	= msToHour(TC.OperatingHours[4][0]);
+						args.from_minute_sat= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
+						args.from_ampm_sat	= ampm(TC.OperatingHours[4][0]);
+						args.to_hour_sat	= msToHour(TC.OperatingHours[4][1]);
+						args.to_minute_sat	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
+						args.to_ampm_sat	= ampm(TC.OperatingHours[4][1]);
 						//closed date ranges
 						args.closed = [];
 						for(i in TC.ClosedDates) {
@@ -362,7 +362,7 @@ exports.makeArgsInstructor = function(req, args) {
 				}
 				//Add each term to the term dropbox
 				for(i in tcenters) {
-					args.terms.push({name: tcenters[i].Term, value: "course POST value"});
+					args.terms.push({name: tcenters[i].Term, value: tcenters[i].Term});
 				}
 				args.terms.sort();
 			});

@@ -2,6 +2,7 @@ var db = require('./db');
 var classes = db.collection('classes');
 var roster = db.collection('roster');
 var exams = db.collection('exams');
+var testingcenters = db.collection('testingcenters')
 
 //Create an exam request
 exports.createExam = function(req, callback) {
@@ -20,6 +21,21 @@ exports.createExam = function(req, callback) {
 		endTime += 43200000;
 	}
 	var duration = req.body.duration * 60000;
+
+	//Check if end time is earlier than start time
+	if(startDate.getTime() + startTime >= endDate.getTime() + endTime) {
+		console.log(startDate);
+		console.log(endDate);
+		return callback("FAILED: The end time for the exam is earlier than the start time.");
+	}
+
+	//check if the hours are within the operating hours
+	testingcenters.findOne({Term: term}, function(err, TC) {
+		if(err) {
+			console.log(err);
+		}
+		
+	});
 	
 	//Set the variables that differ based on whether exam is adhoc or not.
 	var adhoc = (req.body.type == "ad-hoc");
