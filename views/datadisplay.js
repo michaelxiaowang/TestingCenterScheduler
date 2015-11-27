@@ -499,8 +499,12 @@ function msToTime(ms) {
 	} else {
 		minutes = minutes.toString();
 	}
-	if(hour > 12) {
-		hour -= 12;
+	if(hour == 0) {
+		hour = 12;
+	} else if(hour >= 12) {
+		if(hour > 12) {
+			hour -= 12;
+		}
 		return hour.toString() + ":" + minutes + "PM";
 	} 
 	return hour.toString() + ":" + minutes + "AM";

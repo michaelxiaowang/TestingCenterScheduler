@@ -16,7 +16,13 @@ exports.studentCreateAppointment = function(req, callback) {
 
 	//Find the exam with this specific id
 	exams.findOne({examID: req.body.exam}, function(err, exam) {
-		if(err) {
+
+		getAvailableTimeslots(exam, function(result) {
+			return callback(result);
+		});
+		
+
+		/*if(err) {
 			console.log(err);
 		}
 		
@@ -53,17 +59,28 @@ exports.studentCreateAppointment = function(req, callback) {
 				}
 			}
 
+			//Check if the appointment is entirely within exam period
+			if(date.getTime() + start < exam.startDate.getTime() + exam.startTime || date.getTime() + start > exam.endDate.getTime() + exam.endTime ||
+				date.getTime() + start + exam.duration < exam.startDate.getTime() + exam.startTime || date.getTime() + start + exam.duration > exam.endDate.getTime() + exam.endTime) {
+				return callback("The duration of this exam is not within the exam period");
+			}
+
 			//Find all appointments that are on this day
 			appointments.find({day: date}).toArray(function(err, Appts) {
 				if(err) {
 					console.log(err);
 				}
 
-				//var availableSlots = 
-				
-				return callback('hi');
+				//Sort appointments by seat, then start time
+				Appts.sort(sortAppt);
+
+				//check appointment for a conflict
+				var currentSeat = 1; //The seat currently being examined
+				for(i in Appts) {
+
+				}
 			});	
-		});
+		});*/
 	
 		/*appointments.insert({
 			student: req.user.NetID,
@@ -71,6 +88,7 @@ exports.studentCreateAppointment = function(req, callback) {
 			day: date,
 			startTime: start,
 			endTime: end,
+			seat: seatNum,
 			attended: false
 		})*/
 		//return callback("Appointment created.");
@@ -116,4 +134,65 @@ exports.confirmAppointment = function(student, exam) {
 //Admin cancel appointment
 exports.adminCancel = function(student, exam) {
 	appointments.remove({"student": student, examID: exam});
+}
+
+function sortAppt(appt1, appt2) {
+	if(appt1.seatNumber < appt2.seatNumber) {
+		return -1;
+	}
+	if(appt2.seatNumber < appt1.seatNumber) {
+		return 1;
+	}
+	if(appt1.startTime < appt2.startTime) {
+		return -1;
+	}
+	if(appt2.startTime < appt1.startTime) {
+		return 1;
+	}
+}
+
+function getAvailableTimeslots(exam, callback) {
+
+	//Find the testing center for this term
+	testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
+
+		var halfHour = exam.startTime + exam.startDate.getTime();
+
+		//If the exam period doesn't start on a half hour, find the first half hour
+		if(exam.startTime % 1800000 != 0) {
+			var halfHour = exam.startTime + 1800000 - (exam.startTime % 1800000);
+		}
+
+		var end = exam.endTime + exam.endDate.getTime() - exam.startTime - exam.startDate.getTime(); //end of exam period
+
+		//We examine each half hour in the exam period
+		for(var z = 0; z < end; z += 1800000) {
+			endOfExam = z + exam.duration;
+
+			//If the half hour isn't within closed periods
+			/*for(i in TC.ClosedDates) {
+				if((z > TC.ClosedDates[i].Start.getTime() && z < TC.ClosedDates[i].End.getTime()) ||
+					(endOfExam > TC.ClosedDates[i].Start.getTime() && endOfExam < TC.ClosedDates[i].End.getTime())) {
+					continue;
+				}
+			}
+
+			//If the half hour isn't within closed periods
+			for(i in TC.ReservedDates) {
+				if((z > TC.ReservedDates[i].Start.getTime() && z < TC.ReservedDates[i].End.getTime()) ||
+					(endOfExam > TC.ReservedDates[i].Start.getTime() && endOfExam < TC.ReservedDates[i].End.getTime())) {
+					continue;
+				}
+			}*/
+
+			//If the half hour isn't in operating hours, go to next half hour
+			if(!(z % 86400000 >= TC.OperatingHours[new Date(z).getDay()][0] &&
+				endOfExam % 86400000 <= TC.OperatingHours[new Date(z).getDay()][1])) {
+				continue;
+			}
+			console.log(new Date(z + halfHour));
+		}
+		console.log('done');
+		return callback('.');
+	});
 }
