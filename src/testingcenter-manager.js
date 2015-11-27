@@ -157,9 +157,15 @@ exports.updateTCInfo = function(req, callback) {
 
 //HH:MM AM/PM format to milliseconds
 function hourToMS(hours, minutes, ampm) {
-    if(ampm == 'am') {
+    if(ampm == 'pm') {
+        if(hours < 12) {
+            hours = parseInt(hours) + 12;
+        }
         return hours*3600000 + minutes*60000;
     } else {
-        return hours*3600000 + minutes*60000 + 43200000;
+        if(hours == 12) {
+            hours = 0;
+        }
+        return hours*3600000 + minutes*60000;
     }
 }

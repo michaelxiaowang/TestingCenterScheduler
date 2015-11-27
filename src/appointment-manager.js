@@ -18,11 +18,17 @@ exports.studentCreateAppointment = function(req, callback) {
 	exams.findOne({examID: req.body.exam}, function(err, exam) {
 
 		getAvailableTimeslots(exam, function(result) {
-			return callback(result);
+			/*var informTimes = "Available times for this exam are:                         " + "\\n"; //some space for formatting
+			for(i in result) {
+				var dateString = prettyDate(result[i]);
+				informTimes = informTimes + dateString + "\\n";
+			}
+			return callback(informTimes);*/
+
 		});
 		
 
-		/*if(err) {
+		if(err) {
 			console.log(err);
 		}
 		
@@ -36,12 +42,16 @@ exports.studentCreateAppointment = function(req, callback) {
 			var date = new Date(req.body.year, req.body.month-1, req.body.day);
 			if(req.body.ampm == 'pm') {
 				req.body.hour = parseInt(req.body.hour) % 12 + 12;
+			} else if(req.body.hour == 12) {
+				req.body.hour = 0;
 			}
-			var start = req.body.hour*3600000 + req.body.minute*60000;
-			var end = start + exam.duration + TC.gapTime*60000; //end time includes gap time
+			var start = parseInt(req.body.hour*3600000) + parseInt(req.body.minute*60000);
+			var end = start + exam.duration;
 
 			//Check if start and end are entirely within operating hours
 			if(start < TC.OperatingHours[date.getDay()][0] || start + exam.duration > TC.OperatingHours[date.getDay()][1]) {
+				console.log(start);
+				console.log(end);
 				return callback("Appointment is not within the operating hours for this day");
 			}
 
@@ -66,7 +76,7 @@ exports.studentCreateAppointment = function(req, callback) {
 			}
 
 			//Find all appointments that are on this day
-			appointments.find({day: date}).toArray(function(err, Appts) {
+			/*appointments.find({day: date}).toArray(function(err, Appts) {
 				if(err) {
 					console.log(err);
 				}
@@ -79,19 +89,34 @@ exports.studentCreateAppointment = function(req, callback) {
 				for(i in Appts) {
 
 				}
+			});*/
+
+			appointments.find({student: req.user.NetID}).toArray(function(err, sameDay) {
+				if(err) {
+					console.log(err);
+				}
+				//If there is more than 0 appointments
+				if(sameDay.length > 0) {
+					for(i in sameDay) {
+						if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
+							(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
+							return callback("You already have an exam in this time period");
+						}
+					}
+				}
+				appointments.insert({
+					student: req.user.NetID,
+					examID: req.body.exam,
+					day: date,
+					startTime: start,
+					endTime: end,
+					seat: 1,
+					attended: false
+				})
+
 			});	
-		});*/
-	
-		/*appointments.insert({
-			student: req.user.NetID,
-			examID: req.body.exam,
-			day: date,
-			startTime: start,
-			endTime: end,
-			seat: seatNum,
-			attended: false
-		})*/
-		//return callback("Appointment created.");
+			return callback("Appointment created.");	
+		});
 	});
 }
 
@@ -151,6 +176,43 @@ function sortAppt(appt1, appt2) {
 	}
 }
 
+function sortApptByTime(appt1, appt2) {
+	if(appt1.startTime < appt2.startTime) {
+		return -1;
+	}
+	if(appt2.startTime < appt1.startTime) {
+		return 1;
+	}
+}
+
+function sortApptBySeat(appt1, appt2) {
+	if(appt1.seatNumber < appt2.seatNumber) {
+		return -1;
+	}
+	if(appt2.seatNumber < appt1.seatNumber) {
+		return 1;
+	}
+}
+
+//Gets the format of a Date in: Day of Week, Month Day of Month, Year
+function prettyDate(date) {
+	var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+	var ampm = "AM";
+	if(date.getHours() >= 12) {
+		ampm = "PM";
+	}
+	var hours = date.getHours() % 12;
+	if(hours == 0) {
+		hours = 12;
+	}
+	var minutes = date.getMinutes();
+	if(minutes < 10) {
+		minutes = "0" + minutes;
+	}
+	return days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear() + " at " + hours + ":" + minutes + ampm;
+}
+
 function getAvailableTimeslots(exam, callback) {
 
 	//Find the testing center for this term
@@ -163,31 +225,30 @@ function getAvailableTimeslots(exam, callback) {
 			var halfHour = exam.startTime + exam.startDate.getTime();
 		}
 
-		//console.log(new Date(halfHour) + ", " + halfHour);
-
 		var end = exam.endTime + exam.endDate.getTime(); //end of exam period
+		var validTimes = []; //Instantiate new array to hold valid time slots
 
 		//We examine each half hour in the exam period
 		for(var z = halfHour; z < end; z += 1800000) {
-			var print1 = false;
-			var print2 = false;
-			var print3 = false;
+			var withinOH = false;
+			var notRD = false;
+			var notCD = false;
 
 			endOfExam = z + exam.duration;
 
 			//If the half hour isn't in operating hours, go to next half hour
 			if(z % 86400000 >= TC.OperatingHours[new Date(z).getDay()][0] &&
 				endOfExam % 86400000 <= TC.OperatingHours[new Date(z).getDay()][1]) {
-				print3 = true;
+				withinOH = true;
 			} else {
-				//continue;
+				continue;
 			}
 
 			//If the half hour isn't within reserved periods
 			for(i in TC.ReservedDates) {
-				if(((z > TC.ReservedDates[i].Start.getTime() && z < TC.ReservedDates[i].End.getTime()) &&
+				if(!((z > TC.ReservedDates[i].Start.getTime() && z < TC.ReservedDates[i].End.getTime()) ||
 					(endOfExam > TC.ReservedDates[i].Start.getTime() && endOfExam < TC.ReservedDates[i].End.getTime()))) {
-					console.log(new Date(endOfExam) + ", " + TC.ReservedDates[i].Start.getTime() + ", " + TC.ReservedDates[i].Start);
+					notRD = true;
 				}
 			}
 
@@ -195,16 +256,46 @@ function getAvailableTimeslots(exam, callback) {
 			for(i in TC.ClosedDates) {
 				if(!((z > TC.ClosedDates[i].Start.getTime() && z < TC.ClosedDates[i].End.getTime()) ||
 					(endOfExam > TC.ClosedDates[i].Start.getTime() && endOfExam < TC.ClosedDates[i].End.getTime()))) {
-					var print2 = true;
+					notCD = true;
 				}
 			}	
 
-			if(print1 && print2 && print3) {
-				//console.log(new Date(z));
+			//If all three time conditions are met
+			if(withinOH && notRD && notCD) {
+				var d = new Date(z);
+				d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(z % 86400000/3600000), Math.floor(z % 86400000 % 3600000/60000));
+				validTimes.push(d);
+			}
+		}
+
+		//Now we examine all other appointments that use this time period
+		var availableTimes = [] //Holds all timeslots which are available
+
+		//Get every appointment in exam period
+		appointments.find({startTime: { $gte: halfHour, $lte: end}}).toArray(function(err, Appts) {
+
+			//For each valid time
+			for(var i = 0; i < validTimes.length; i++) {
+				var taken = false;
+				//For each seat
+				for(var j = 1; j <= TC.numSeats + TC.numSetAside; j++) {
+					//For each appointment
+					for(var k = 0; k < Appts.length; k++) {
+						if(Appts[k].seat == j && 
+							Appts[k].startTime.getTime() >= validTimes[i].getTime() && 
+							Appts[k].startTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime ||
+							Appts[k].endTime.getTime() >= validTimes[i].getTime() && 
+							Appts[k].endTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime) {
+							taken = true;
+						}
+					}
+				}
+				if(!taken) {
+					availableTimes.push(validTimes[i]);
+				}
 			}
 
-		}
-		console.log(new Date().toISOString());
-		return callback('.');
+			return callback(availableTimes);
+		});
 	});
 }
