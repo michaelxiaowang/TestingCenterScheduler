@@ -104,52 +104,52 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						//sunday
 						args.from_hour_sun	= msToHour(TC.OperatingHours[0][0]);
 						args.from_minute_sun= Math.floor((TC.OperatingHours[0][0]%3600000)/60000);
-						args.from_ampm_sun	= ampm(TC.OperatingHours[0][0]);
+						args.from_ampm_sun	= ampmMS(TC.OperatingHours[0][0]);
 						args.to_hour_sun	= msToHour(TC.OperatingHours[0][1]);
 						args.to_minute_sun	= Math.floor((TC.OperatingHours[0][1]%3600000)/60000);
-						args.to_ampm_sun	= ampm(TC.OperatingHours[0][1]);
+						args.to_ampm_sun	= ampmMS(TC.OperatingHours[0][1]);
 						//monday
 						args.from_hour_mon	= msToHour(TC.OperatingHours[1][0]);
 						args.from_minute_mon= Math.floor((TC.OperatingHours[1][0]%3600000)/60000);
-						args.from_ampm_mon	= ampm(TC.OperatingHours[1][0]);
+						args.from_ampm_mon	= ampmMS(TC.OperatingHours[1][0]);
 						args.to_hour_mon	= msToHour(TC.OperatingHours[1][1]);
 						args.to_minute_mon	= Math.floor((TC.OperatingHours[1][1]%3600000)/60000);
-						args.to_ampm_mon	= ampm(TC.OperatingHours[1][1]);
+						args.to_ampm_mon	= ampmMS(TC.OperatingHours[1][1]);
 						//tuesday
 						args.from_hour_tue	= msToHour(TC.OperatingHours[2][0]);
 						args.from_minute_tue= Math.floor((TC.OperatingHours[2][0]%3600000)/60000);
-						args.from_ampm_tue	= ampm(TC.OperatingHours[2][0]);
+						args.from_ampm_tue	= ampmMS(TC.OperatingHours[2][0]);
 						args.to_hour_tue	= msToHour(TC.OperatingHours[2][1]);
 						args.to_minute_tue	= Math.floor((TC.OperatingHours[2][1]%3600000)/60000);
-						args.to_ampm_tue	= ampm(TC.OperatingHours[2][1]);
+						args.to_ampm_tue	= ampmMS(TC.OperatingHours[2][1]);
 						//wednesday
 						args.from_hour_wed	= msToHour(TC.OperatingHours[3][0]);
 						args.from_minute_wed= Math.floor((TC.OperatingHours[3][0]%3600000)/60000);
-						args.from_ampm_wed	= ampm(TC.OperatingHours[3][0]);
+						args.from_ampm_wed	= ampmMS(TC.OperatingHours[3][0]);
 						args.to_hour_wed	= msToHour(TC.OperatingHours[3][1]);
 						args.to_minute_wed	= Math.floor((TC.OperatingHours[3][1]%3600000)/60000);
-						args.to_ampm_wed	= ampm(TC.OperatingHours[3][1]);
+						args.to_ampm_wed	= ampmMS(TC.OperatingHours[3][1]);
 						//thursday
 						args.from_hour_thu	= msToHour(TC.OperatingHours[4][0]);
 						args.from_minute_thu= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
-						args.from_ampm_thu	= ampm(TC.OperatingHours[4][0]);
+						args.from_ampm_thu	= ampmMS(TC.OperatingHours[4][0]);
 						args.to_hour_thu	= msToHour(TC.OperatingHours[4][1]);
 						args.to_minute_thu	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
-						args.to_ampm_thu	= ampm(TC.OperatingHours[4][1]);
+						args.to_ampm_thu	= ampmMS(TC.OperatingHours[4][1]);
 						//friday
 						args.from_hour_fri	= msToHour(TC.OperatingHours[4][0]);
 						args.from_minute_fri= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
-						args.from_ampm_fri	= ampm(TC.OperatingHours[4][0]);
+						args.from_ampm_fri	= ampmMS(TC.OperatingHours[4][0]);
 						args.to_hour_fri	= msToHour(TC.OperatingHours[4][1]);
 						args.to_minute_fri	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
-						args.to_ampm_fri	= ampm(TC.OperatingHours[4][1]);
+						args.to_ampm_fri	= ampmMS(TC.OperatingHours[4][1]);
 						//saturday
 						args.from_hour_sat	= msToHour(TC.OperatingHours[4][0]);
 						args.from_minute_sat= Math.floor((TC.OperatingHours[4][0]%3600000)/60000);
-						args.from_ampm_sat	= ampm(TC.OperatingHours[4][0]);
+						args.from_ampm_sat	= ampmMS(TC.OperatingHours[4][0]);
 						args.to_hour_sat	= msToHour(TC.OperatingHours[4][1]);
 						args.to_minute_sat	= Math.floor((TC.OperatingHours[4][1]%3600000)/60000);
-						args.to_ampm_sat	= ampm(TC.OperatingHours[4][1]);
+						args.to_ampm_sat	= ampmMS(TC.OperatingHours[4][1]);
 						//closed date ranges
 						args.closed = [];
 						for(i in TC.ClosedDates) {
@@ -159,10 +159,18 @@ exports.makeArgsAdmin = function(req, args, callback) {
 						//reserved time ranges
 						args.reserved = [];
 						for(i in TC.ReservedDates) {
+							var startHour = TC.ReservedDates[i].Start.getHours();
+							var endHour = TC.ReservedDates[i].End.getHours();
+							if(TC.ReservedDates[i].Start.getHours() == 0) {
+								startHour = 12;
+							}
+							if(TC.ReservedDates[i].End.getHours() == 0) {
+								endHour = 12;
+							}
 							args.reserved.push({from_month: TC.ReservedDates[i].Start.getMonth()+1, from_day: TC.ReservedDates[i].Start.getDate(), from_year: TC.ReservedDates[i].Start.getFullYear(), 
-								from_hour: msToHour(TC.ReservedDates[i].Start.getHours()), from_minute: TC.ReservedDates[i].Start.getMinutes(), from_ampm: ampm(TC.ReservedDates[i].Start.getHours()), 
+								from_hour: startHour, from_minute: TC.ReservedDates[i].Start.getMinutes(), from_ampm: ampm(TC.ReservedDates[i].Start.getHours()), 
 								to_month: TC.ReservedDates[i].End.getMonth()+1, to_day: TC.ReservedDates[i].End.getDate(), to_year: TC.ReservedDates[i].End.getFullYear(), 
-								to_hour: msToHour(TC.ReservedDates[i].End.getHours()), to_minute: TC.ReservedDates[i].End.getMinutes(), to_ampm: ampm(TC.ReservedDates[i].End.getHours())})
+								to_hour: endHour, to_minute: TC.ReservedDates[i].End.getMinutes(), to_ampm: ampm(TC.ReservedDates[i].End.getHours())})
 						}
 					}
 					callback();
@@ -521,7 +529,15 @@ function msToHour(ms) {
 }
 
 //milliseconds to apmpm
-function ampm(ms) {
+function ampm(hours) {
+	if(hours >= 12) {
+		return 'pm';
+	}
+	return 'am';
+}
+
+//milliseconds to apmpm
+function ampmMS(ms) {
 	if(ms >= 43200000) {
 		return 'pm';
 	}

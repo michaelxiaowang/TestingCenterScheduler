@@ -156,43 +156,55 @@ function getAvailableTimeslots(exam, callback) {
 	//Find the testing center for this term
 	testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
 
-		var halfHour = exam.startTime + exam.startDate.getTime();
-
 		//If the exam period doesn't start on a half hour, find the first half hour
 		if(exam.startTime % 1800000 != 0) {
 			var halfHour = exam.startTime + 1800000 - (exam.startTime % 1800000);
+		} else {
+			var halfHour = exam.startTime + exam.startDate.getTime();
 		}
 
-		var end = exam.endTime + exam.endDate.getTime() - exam.startTime - exam.startDate.getTime(); //end of exam period
+		//console.log(new Date(halfHour) + ", " + halfHour);
+
+		var end = exam.endTime + exam.endDate.getTime(); //end of exam period
 
 		//We examine each half hour in the exam period
-		for(var z = 0; z < end; z += 1800000) {
+		for(var z = halfHour; z < end; z += 1800000) {
+			var print1 = false;
+			var print2 = false;
+			var print3 = false;
+
 			endOfExam = z + exam.duration;
 
-			//If the half hour isn't within closed periods
-			/*for(i in TC.ClosedDates) {
-				if((z > TC.ClosedDates[i].Start.getTime() && z < TC.ClosedDates[i].End.getTime()) ||
-					(endOfExam > TC.ClosedDates[i].Start.getTime() && endOfExam < TC.ClosedDates[i].End.getTime())) {
-					continue;
-				}
-			}
-
-			//If the half hour isn't within closed periods
-			for(i in TC.ReservedDates) {
-				if((z > TC.ReservedDates[i].Start.getTime() && z < TC.ReservedDates[i].End.getTime()) ||
-					(endOfExam > TC.ReservedDates[i].Start.getTime() && endOfExam < TC.ReservedDates[i].End.getTime())) {
-					continue;
-				}
-			}*/
-
 			//If the half hour isn't in operating hours, go to next half hour
-			if(!(z % 86400000 >= TC.OperatingHours[new Date(z).getDay()][0] &&
-				endOfExam % 86400000 <= TC.OperatingHours[new Date(z).getDay()][1])) {
-				continue;
+			if(z % 86400000 >= TC.OperatingHours[new Date(z).getDay()][0] &&
+				endOfExam % 86400000 <= TC.OperatingHours[new Date(z).getDay()][1]) {
+				print3 = true;
+			} else {
+				//continue;
 			}
-			console.log(new Date(z + halfHour));
+
+			//If the half hour isn't within reserved periods
+			for(i in TC.ReservedDates) {
+				if(((z > TC.ReservedDates[i].Start.getTime() && z < TC.ReservedDates[i].End.getTime()) &&
+					(endOfExam > TC.ReservedDates[i].Start.getTime() && endOfExam < TC.ReservedDates[i].End.getTime()))) {
+					console.log(new Date(endOfExam) + ", " + TC.ReservedDates[i].Start.getTime() + ", " + TC.ReservedDates[i].Start);
+				}
+			}
+
+			//If the half hour isn't within closed periods
+			for(i in TC.ClosedDates) {
+				if(!((z > TC.ClosedDates[i].Start.getTime() && z < TC.ClosedDates[i].End.getTime()) ||
+					(endOfExam > TC.ClosedDates[i].Start.getTime() && endOfExam < TC.ClosedDates[i].End.getTime()))) {
+					var print2 = true;
+				}
+			}	
+
+			if(print1 && print2 && print3) {
+				//console.log(new Date(z));
+			}
+
 		}
-		console.log('done');
+		console.log(new Date().toISOString());
 		return callback('.');
 	});
 }

@@ -44,11 +44,19 @@ exports.updateTCInfo = function(req, callback) {
     while(req.body["from_month_"+i]) {
         reserved[i] = new Object();
         if(req.body["from_ampm_"+i] == 'pm') {
-            req.body["from_hour_"+i] = parseInt(req.body["from_hour_"+i]) + 12;
+            if(parseInt(req.body["from_hour_"+i]) != 12) {
+                req.body["from_hour_"+i] = parseInt(req.body["from_hour_"+i]) + 12;
+            }
+        } else if(parseInt(req.body["from_hour_"+i]) == 12) {
+            req.body["from_hour_"+i] = 0;
         }
         reserved[i].Start = new Date(req.body["from_year_"+i], req.body["from_month_"+i]-1, req.body["from_day_"+i], req.body["from_hour_"+i], req.body["from_minute_"+i]);
         if(req.body["to_ampm_"+i] == 'pm') {
-            req.body["to_hour_"+i] = parseInt(req.body["to_hour_"+i]) + 12;
+            if(parseInt(req.body["to_hour_"+i]) != 12) {
+                req.body["to_hour_"+i] = parseInt(req.body["to_hour_"+i]) + 12;
+            }
+        } else if(parseInt(req.body["to_hour_"+i]) == 12) {
+            req.body["to_hour_"+i] = 0;
         }
         reserved[i].End = new Date(req.body["to_year_"+i], req.body["to_month_"+i]-1, req.body["to_day_"+i], req.body["to_hour_"+i], req.body["to_minute_"+i]);
         //Check to see if the end time is earlier than or equal the start time
