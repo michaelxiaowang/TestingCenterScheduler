@@ -200,12 +200,16 @@ exports.makeArgsAdmin = function(req, args, callback) {
 		break;
 		case "util": //Display Utilization
 			args.action = "/admin/util";
-			args.terms	= [
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-			];
-			callback();
+			args.terms	= [];
+			testingcenters.find().toArray(function(err, TCs) {
+				if(err) {
+					console.log(err);
+				}
+				TCs.forEach(function(TCs) {
+					args.terms.push({name: TCs.Term + " - " + TCs.Name, value: TCs.Term});
+				});
+				callback();
+			});
 		break;
 		case "review": //Review Requests
 			//if approval query string exists in url
@@ -298,12 +302,13 @@ exports.makeArgsAdmin = function(req, args, callback) {
 		break;
 		case "report": //Generate Report
 			args.action = "/admin/report"; //POST action
-			args.terms 	= [
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-				{name:"term display name", value:"term POST value"},
-			];
-			callback();
+			args.terms 	= [];
+			testingcenters.find().sort({Term: 1}).toArray(function(err, TCs) {
+				TCs.forEach(function(TCs) {
+					args.terms.push({name: TCs.Term + " - " + TCs.Name, value: TCs.Term});
+				});
+				callback();
+			});
 		break;
 	}
 }
@@ -469,6 +474,122 @@ exports.makeArgsStudent = function(req, args, callback) {
 	}
 };
 
+
+exports.generateReport = function(req, args, callback) {
+	var type	= req.body.type; //'day' 'week' 'term' or 'range'
+	var start	= req.body.start; //term
+	var end 	= req.body.end; //term
+	var isExport= req.body.export; //if set, export was clicked
+	//do something with these
+	if (type == "day") {
+		args.day = true;
+		args.data = [];
+		appointments.find().sort({day: 1}).toArray(function(err, Appts) {
+			if(err) {
+				console.log(err);
+			}
+			Appts.forEach(function(Appts) {
+				if(args.data.length == 0) {
+					args.data.push({day:prettyDate(Appts.day), appts: 1});
+				} else {
+					if(args.data[args.data.length-1].day == prettyDate(Appts.day)) {
+						args.data[args.data.length-1].appts += 1;
+					} else {
+						args.data.push({day:prettyDate(Appts.day), appts: 1});
+					}
+				}
+			});
+			callback();
+		});
+	} else if (type == "week") {
+		args.week = true;
+		args.data = [];
+		appointments.find({term: start}).sort({day: 1, examID: 1}).toArray(function(err, Appts) {
+			var weeks = [];
+			//Create weeks for each appointment
+			Appts.forEach(function(Appts) {
+				if(weeks.length == 0) {
+					weeks.push(new Date(Appts.day.getTime() - (Appts.day.getDay()*24*60*60*1000)));
+				} else {
+					if(Appts.day.getTime() > weeks[weeks.length-1].getTime() + (7*24*60*60*1000)) {
+						weeks.push(new Date(Appts.day.getTime() - (Appts.day.getDay()*24*60*60*1000)));
+					}
+				}
+			});
+			//Fill in missing weeks
+			for(var i = 0; i < weeks.length - 1; i++) {
+				if(weeks[i+1].getTime() != weeks[i].getTime() + (7*24*60*60*1000)) {
+					weeks.splice(i+1, 0, new Date(weeks[i].getTime() + (7*24*60*60*1000)));
+					i = 0;
+				}
+			}
+			//Create a value for each week
+			weeks.forEach(function(week) {
+				args.data.push({week:"Week of " + prettyDate(week), appts: 0, courses: ""});
+			});
+			//Now add the values
+			Appts.forEach(function(Appts) {
+				for(var i = 0; i < weeks.length; i++) {
+					if(i < weeks.length - 1) {
+						if(Appts.day.getTime() >= weeks[i].getTime() && Appts.day.getTime() < weeks[i+1].getTime()) {
+							args.data[i].appts += 1;
+							if(args.data[i].courses == "") {
+								args.data[i].courses += (Appts.examID.substring(0, Appts.examID.indexOf('-')));
+							} else if(args.data[i].courses.indexOf(Appts.examID.substring(0, Appts.examID.indexOf('-'))) == -1) {
+								args.data[i].courses += (", " + Appts.examID.substring(0, Appts.examID.indexOf('-')));
+							}
+							break;
+						}
+					} else {
+						args.data[i].appts += 1;
+						if(args.data[i].courses == "") {
+							args.data[i].courses += (Appts.examID.substring(0, Appts.examID.indexOf('-')));
+						} else if(args.data[i].courses.indexOf(Appts.examID.substring(0, Appts.examID.indexOf('-'))) == -1) {
+							args.data[i].courses += (", " + Appts.examID.substring(0, Appts.examID.indexOf('-')));
+						}
+					}
+				}
+			});
+			callback();
+		});
+	} else if (type == "term") {
+		args.term = true;
+		args.data = [];
+		exams.find({term: start, adhoc: false}).sort({examID: 1}).toArray(function(err, Exams) {
+			if(err) {
+				console.log(err);
+			}
+			Exams.forEach(function(Exams) {
+				Exams.examID = Exams.examID.substring(0, Exams.examID.indexOf('-'));
+				var exists = false;
+				args.data.forEach(function(data) {
+					if(data.course == Exams.examID) {
+						exists = true;
+					}
+				});
+				if (exists == false) {
+					args.data.push({course: Exams.examID});
+				}
+			});
+			callback();
+		});
+	} else if (type == "range") {
+		args.range = true;
+		args.data = [];	
+		testingcenters.find({Term: {$lte: end, $gte: start}}).sort({Term: 1}).toArray(function(err, TCs) {
+			if(err) {
+				console.log(err);
+			}
+			TCs.forEach(function(TCs) {
+				appointments.find({term: TCs.Term}).toArray(function(err, Appts) {
+					args.data.push({term: TCs.Term + " - " + TCs.Name, appts: Appts.length});
+				});
+			});
+			callback();
+		});
+	}
+}
+
 //view the attendance for an exam
 exports.viewAttendance = function(req, args, callback) {
 	args.data = [];
@@ -481,7 +602,7 @@ exports.viewAttendance = function(req, args, callback) {
 		for(i in appointmentArray) {
 			//push the appointment's information
 			args.data.push({student: appointmentArray[i].student, time: prettyDate(appointmentArray[i].day) + " at " + msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), 
-				seat: "assigned seat", present: appointmentArray[i].attended});
+				seat: appointmentArray[i].seat + " (" + appointmentArray[i].seatType + ")", present: appointmentArray[i].attended});
 		}
 		callback(args);
 	})

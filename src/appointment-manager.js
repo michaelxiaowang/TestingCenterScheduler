@@ -8,6 +8,16 @@ var testingcenters = db.collection('testingcenters');
 /*Creates a new appointment*/
 exports.studentCreateAppointment = function(req, callback) {
 
+	//Check if student already has appointment for this exam
+	appointments.findOne({student: req.User.NetID, examID: req.body.exam}, function(err, exists) {
+		if(err) {
+			console.log(err);
+		}
+		if(exists != null) {
+			return callback("You already have an appointment for this exam");
+		}
+	});
+
 	//Check if appointment starts on hour or half-hour
 	if(req.body.minute != 0 && req.body.minute != 30) {
 		return callback("Appointment must start on the hour or half hour")
@@ -46,6 +56,7 @@ exports.studentCreateAppointment = function(req, callback) {
 			}
 			var start = parseInt(req.body.hour*3600000) + parseInt(req.body.minute*60000);
 			var end = start + exam.duration;
+			var gap = TC.gapTime * 60000;
 
 			//Check if start and end are entirely within operating hours
 			if(start < TC.OperatingHours[date.getDay()][0] || start + exam.duration > TC.OperatingHours[date.getDay()][1]) {
@@ -86,8 +97,8 @@ exports.studentCreateAppointment = function(req, callback) {
 
 				for(i in Appts) {
 					//If there is an appointment that overlaps
-					if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
-						(Appts[i].endTime > start && Appts[i].endTime < end)) {
+					if((Appts[i].startTime >= start && Appts[i].startTime < end + gap) ||
+						(Appts[i].endTime + gap > start && Appts[i].endTime + gap < end + gap)) {
 						if(Appts[i].examID == req.body.exam) {
 							//If it is the same exam occupying that spot
 							if(Appts[i].seatType == 'normal') {
@@ -147,8 +158,9 @@ exports.studentCreateAppointment = function(req, callback) {
 					//If there is more than 0 appointments
 					if(sameDay.length > 0) {
 						for(i in sameDay) {
-							if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
-								(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
+							if(((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
+								(sameDay[i].endTime > start && sameDay[i].endTime < end))  && 
+								sameDay[i].day == date) {
 								return callback("You already have an exam in this time period");
 							}
 						}
@@ -173,6 +185,17 @@ exports.studentCreateAppointment = function(req, callback) {
 
 /*Creates a new appointment*/
 exports.adminCreateAppointment = function(req, callback) {
+
+	//Check if student already has appointment for this exam
+	appointments.findOne({student: req.body.student, examID: req.body.cours}, function(err, exists) {
+		if(err) {
+			console.log(err);
+		}
+		if(exists != null) {
+			return callback("You already have an appointment for this exam");
+		}
+	});
+
 	//Check if appointment starts on hour or half-hour
 	if(req.body.minute != 0 && req.body.minute != 30) {
 		return callback("Appointment must start on the hour or half hour")
@@ -211,6 +234,7 @@ exports.adminCreateAppointment = function(req, callback) {
 			}
 			var start = parseInt(req.body.hour*3600000) + parseInt(req.body.minute*60000);
 			var end = start + exam.duration;
+			var gap = TC.gapTime * 60000;
 
 			//Check if start and end are entirely within operating hours
 			if(start < TC.OperatingHours[date.getDay()][0] || start + exam.duration > TC.OperatingHours[date.getDay()][1]) {
@@ -251,8 +275,8 @@ exports.adminCreateAppointment = function(req, callback) {
 					}
 					for(i in Appts) {
 						//If there is an appointment that overlaps
-						if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
-							(Appts[i].endTime > start && Appts[i].endTime < end)) {
+						if((Appts[i].startTime >= start && Appts[i].startTime < end + gap) ||
+							(Appts[i].endTime + gap > start && Appts[i].endTime + gap < end + gap)) {
 							if(Appts[i].examID == req.body.course) {
 								//If it is the same exam occupying that spot
 								if(Appts[i].seatType == 'normal') {
@@ -272,8 +296,8 @@ exports.adminCreateAppointment = function(req, callback) {
 					}
 						for(i in Appts) {
 						//If there is an appointment that overlaps
-						if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
-							(Appts[i].endTime > start && Appts[i].endTime < end)) {
+						if((Appts[i].startTime >= start && Appts[i].startTime < end + gap) ||
+							(Appts[i].endTime + gap > start && Appts[i].endTime + gap < end + gap)) {
 							if(Appts[i].examID == req.body.course) {
 								//If it is the same exam occupying that spot
 								if(Appts[i].seatType != 'normal') {
@@ -333,8 +357,9 @@ exports.adminCreateAppointment = function(req, callback) {
 					//If there is more than 0 appointments
 					if(sameDay.length > 0) {
 						for(i in sameDay) {
-							if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
-								(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
+							if(((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
+								(sameDay[i].endTime > start && sameDay[i].endTime < end))  && 
+								sameDay[i].day.getTime() == date.getTime()) {
 								return callback("You already have an exam in this time period");
 							}
 						}
@@ -501,9 +526,9 @@ function getAvailableTimeslots(exam, callback) {
 					for(var k = 0; k < Appts.length; k++) {
 						if(Appts[k].seat == j && 
 							Appts[k].startTime.getTime() >= validTimes[i].getTime() && 
-							Appts[k].startTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime ||
+							Appts[k].startTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime * 60000 ||
 							Appts[k].endTime.getTime() >= validTimes[i].getTime() && 
-							Appts[k].endTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime) {
+							Appts[k].endTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime * 60000) {
 							taken = true;
 						}
 					}

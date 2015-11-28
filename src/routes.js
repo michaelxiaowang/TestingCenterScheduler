@@ -297,60 +297,13 @@ module.exports = function(app, fs) {
 					});
 				break;
 				case "report":
-					var type	= req.body.type; //'day' 'week' 'term' or 'range'
-					var start	= req.body.start; //term
-					var end 	= req.body.end; //term
-					var isExport= req.body.export; //if set, export was clicked
-					//do something with these
-					if (type == "day") {
-						args.day = true;
-						args.data = [
-							{day:"display day", appts:"number of appointments"},
-							{day:"display day", appts:"number of appointments"},
-							{day:"display day", appts:"number of appointments"},
-						];
-					} else
-					if (type == "week") {
-						args.week = true;
-						args.data = [
-							{week:"display week", appts:"number of appointments", courses:"list of courses"},
-							{week:"display week", appts:"number of appointments", courses:"list of courses"},
-							{week:"display week", appts:"number of appointments", courses:"list of courses"},
-						];
-					} else
-					if (type == "term") {
-						args.term = true;
-						args.data = [
-							{course:"course display name"},
-							{course:"course display name"},
-							{course:"course display name"},
-						];
-					} else
-					if (type == "range") {
-						args.range = true;
-						args.data = [
-							{term:"term display name", appts:"number of appointments"},
-							{term:"term display name", appts:"number of appointments"},
-							{term:"term display name", appts:"number of appointments"},
-						];
-					}
 					DD.makeArgsAdmin(req, args, function() {
-						res.render('frame', args);
+						DD.generateReport(req, args, function() {
+							res.render('frame', args);
+						});
 					});	
 				break;
 				case "util":
-					var from_term	= req.body.from_term; //term
-					var from_month	= req.body.from_month; //1-12
-					var from_day	= req.body.from_day; //0-59
-					var to_term		= req.body.to_term; //term
-					var to_month	= req.body.to_month; //1-12
-					var to_day		= req.body.to_day; //0-59
-					//do something with these
-					args.data = [
-						{day:"display date", util:"utilization (see spec)"},
-						{day:"display date", util:"utilization (see spec)"},
-						{day:"display date", util:"utilization (see spec)"},
-					];
 					DD.makeArgsAdmin(req, args, function() {
 						res.render('frame', args);
 					});	
