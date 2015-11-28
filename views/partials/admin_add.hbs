@@ -5,6 +5,7 @@
 	</form>
 	{{#if student}}
 	<form action="{{action}}" method="post">
+	<input type="hidden" name="student" value="{{student}}">
 	<table id="form">
 		<tr>
 			<td class="left">Course:</td>

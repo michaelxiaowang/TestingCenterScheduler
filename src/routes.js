@@ -265,15 +265,12 @@ module.exports = function(app, fs) {
 			};
 			switch(req.params.value) {
 				case "add":
-					var id 		= req.body.studentid;
-					var course 	= req.body.course;
-					var month 	= req.body.month;
-					var day 	= req.body.day;
-					var hour 	= req.body.hour;
-					var minute 	= req.body.minute;
-					var ampm 	= req.body.ampm; //'am' or 'pm'
-					//do something with these
-					args.result = "Success?"; //display result to user
+					AM.adminCreateAppointment(req, function(result) {
+						args.result = result;
+						DD.makeArgsAdmin(req, args, function() {
+							res.render('frame', args);
+						});	
+					});
 				break;
 				case "checkin":
 					DD.checkInList(req, args, function() {

@@ -90,10 +90,15 @@ exports.studentCreateAppointment = function(req, callback) {
 						(Appts[i].endTime > start && Appts[i].endTime < end)) {
 						if(Appts[i].examID == req.body.exam) {
 							//If it is the same exam occupying that spot
-							occupiedSeats[Appts[i].seat-1] = 2;
+							if(Appts[i].seatType == 'normal') {
+								occupiedSeats[Appts[i].seat-1] = 2;
+							}
+							
 						} else {
 							//If it is a different exam occupying that spot
-							occupiedSeats[Appts[i].seat-1] = 1;
+							if(Appts[i].seatType == 'normal') {
+								occupiedSeats[Appts[i].seat-1] = 1;
+							}
 						}
 					}
 				}
@@ -155,11 +160,209 @@ exports.studentCreateAppointment = function(req, callback) {
 						startTime: start,
 						endTime: end,
 						seat: seatNum,
+						seatType: 'normal',
 						attended: false
 					})
-
+					return callback("Appointment created.");
 				});
-				return callback("Appointment created.");
+			});	
+		});
+	});
+}
+
+/*Creates a new appointment*/
+exports.adminCreateAppointment = function(req, callback) {
+	//Check if appointment starts on hour or half-hour
+	if(req.body.minute != 0 && req.body.minute != 30) {
+		return callback("Appointment must start on the hour or half hour")
+	}
+
+	//Find the exam with this specific id
+	exams.findOne({examID: req.body.course}, function(err, exam) {
+
+		getAvailableTimeslots(exam, function(result) {
+			/*var informTimes = "Available times for this exam are:                         " + "\\n"; //some space for formatting
+			for(i in result) {
+				var dateString = prettyDate(result[i]);
+				informTimes = informTimes + dateString + "\\n";
+			}
+			return callback(informTimes);*/
+
+		});
+		
+
+		if(err) {
+			console.log(err);
+		}
+		
+		//Find which term this exam is for
+		testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
+			if(err) {
+				console.log(err);
+			}
+
+			//Convert our parameters to right format
+			var date = new Date(req.body.year, req.body.month-1, req.body.day);
+			if(req.body.ampm == 'pm') {
+				req.body.hour = parseInt(req.body.hour) % 12 + 12;
+			} else if(req.body.hour == 12) {
+				req.body.hour = 0;
+			}
+			var start = parseInt(req.body.hour*3600000) + parseInt(req.body.minute*60000);
+			var end = start + exam.duration;
+
+			//Check if start and end are entirely within operating hours
+			if(start < TC.OperatingHours[date.getDay()][0] || start + exam.duration > TC.OperatingHours[date.getDay()][1]) {
+				return callback("Appointment is not within the operating hours for this day");
+			}
+
+			//Check if the appointment is set on a closed day
+			for(i in TC.ClosedDates) {
+				if(date.getTime() + start >= TC.ClosedDates[i].Start.getTime() && date.getTime() + start + exam.duration <= TC.ClosedDates[i].End.getTime()) {
+					return callback("Testing center is closed on this date: Appointment cannot be on a closed date");
+				}
+			}
+
+			//Check if the appointment is on a reserved period
+			for(i in TC.ReservedDates) {
+				if(date.getTime() + start >= TC.ReservedDates[i].Start.getTime() && date.getTime() + start + exam.duration <= TC.ReservedDates[i].End.getTime()) {
+					return callback("Testing center is reserved for this period: Appointment cannot be on a reserved time");
+				}
+			}
+
+			//Check if the appointment is entirely within exam period
+			if(date.getTime() + start < exam.startDate.getTime() + exam.startTime || date.getTime() + start > exam.endDate.getTime() + exam.endTime ||
+				date.getTime() + start + exam.duration < exam.startDate.getTime() + exam.startTime || date.getTime() + start + exam.duration > exam.endDate.getTime() + exam.endTime) {
+				return callback("The duration of this exam is not within the exam period");
+			}
+
+			//Find all appointments that are on this day
+			appointments.find({day: date}).toArray(function(err, Appts) {
+				if(err) {
+					console.log(err);
+				}
+
+				var occupiedSeats = []; //holds info whether seat is empty, occupied or occupied by appt for the same exam
+
+				if(req.body.seattype == 'normal') {
+					for(var i = 0; i < TC.numSeats; i++) {
+						occupiedSeats.push(0); //0 means seat is empty, we will do analysis
+					}
+					for(i in Appts) {
+						//If there is an appointment that overlaps
+						if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
+							(Appts[i].endTime > start && Appts[i].endTime < end)) {
+							if(Appts[i].examID == req.body.course) {
+								//If it is the same exam occupying that spot
+								if(Appts[i].seatType == 'normal') {
+									occupiedSeats[Appts[i].seat-1] = 2;
+								}
+							} else {
+								//If it is a different exam occupying that spot
+								if(Appts[i].seatType == 'normal') {
+									occupiedSeats[Appts[i].seat-1] = 1;
+								}
+							}
+						}
+					}
+				} else {
+					for(var i = 0; i < TC.numSetAside; i++) {
+						occupiedSeats.push(0); //0 means seat is empty, we will do analysis
+					}
+						for(i in Appts) {
+						//If there is an appointment that overlaps
+						if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
+							(Appts[i].endTime > start && Appts[i].endTime < end)) {
+							if(Appts[i].examID == req.body.course) {
+								//If it is the same exam occupying that spot
+								if(Appts[i].seatType != 'normal') {
+									occupiedSeats[Appts[i].seat-1] = 2;
+								}
+							} else {
+								//If it is a different exam occupying that spot
+								if(Appts[i].seatType != 'normal') {
+									occupiedSeats[Appts[i].seat-1] = 1;
+								}
+							}
+						}
+					}
+				}
+
+				//Now find a seat from occupied seats
+				var firstAvailable = 0; //first available seat
+				var seatNum = 0;
+				for (i in occupiedSeats) {
+					if(occupiedSeats[i] == 0) { //If the seat is empty
+						if(i == 0) { //If this is the first seat
+							if(occupiedSeats[1] == 0 || occupiedSeats[1] == 1) {//If the second seat is empty or contains a different exam
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						} else if (i == TC.numSeats-1) { //Last seat
+							if(occupiedSeats[TC.numSeats-1] == 0 || occupiedSeats[TC.numSeats-1] == 1) {//If the second seat is empty or contains a different exam
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						} else { //Some seat in middle
+							if((occupiedSeats[parseInt(i)-1] == 0 || occupiedSeats[parseInt(i)-1] == 1) && 
+								(occupiedSeats[parseInt(i)+1] == 0 || occupiedSeats[parseInt(i)+1] == 1)) {
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						}
+					}
+				}
+				if(firstAvailable == 0 && seatNum == 0) {
+					return callback("There are no seats available at this time slot");
+				}
+				if(seatNum == 0) {
+					seatNum = firstAvailable;
+				}
+
+				appointments.find({student: req.body.student}).toArray(function(err, sameDay) {
+					if(err) {
+						console.log(err);
+					}
+					//If there is more than 0 appointments
+					if(sameDay.length > 0) {
+						for(i in sameDay) {
+							if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
+								(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
+								return callback("You already have an exam in this time period");
+							}
+						}
+					}
+					if(req.body.seattype == 'normal') {
+						appointments.insert({
+							student: req.user.NetID,
+							examID: req.body.course,
+							day: date,
+							startTime: start,
+							endTime: end,
+							seat: seatNum,
+							seatType: 'normal',
+							attended: false
+						});
+					} else {
+						appointments.insert({
+							student: req.user.NetID,
+							examID: req.body.course,
+							day: date,
+							startTime: start,
+							endTime: end,
+							seat: seatNum,
+							seatType: 'setaside',
+							attended: false
+						});
+					}
+					return callback("Appointment created.");
+				});
 			});	
 		});
 	});

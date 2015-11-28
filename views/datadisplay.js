@@ -242,13 +242,27 @@ exports.makeArgsAdmin = function(req, args, callback) {
 			args.action = "/admin/add"; //POST action
 			if (req.query.student) {
 				args.student = req.query.student;
-				args.courses= [
-					{name:"course Display Name", value:"course POST value"},
-					{name:"course Display Name", value:"course POST value"},
-					{name:"course Display Name", value:"course POST value"},
-				];
+				args.courses= [];
+				//find each exam with this class id
+				exams.find({Roster: args.student}).toArray(function(err, examArray) {
+					examArray.forEach(function (examArray) {
+						appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
+							if(err) {
+								console.log(err);
+							}
+							if(alreadySigned == null) {
+								if(examArray.status == 'approved') {
+									//push each class with an exam that's approved to display to user
+									args.courses.push({name: examArray.examID, value: examArray.examID});
+								}
+							}
+						});		
+					});	
+					callback();
+				});
+			} else {
+				callback();
 			}
-			callback();
 		break;
 		case "list": //Appointment List
 			args.data = [];
@@ -262,16 +276,16 @@ exports.makeArgsAdmin = function(req, args, callback) {
 					console.log(err);
 				}
 				//for each appointment
-				for(i in appointmentArray) {
+				appointmentArray.forEach(function(appointmentArray) {
 					//if not attended
-					if(appointmentArray[i].attended == false) {
-						args.data.push({course: appointmentArray[i].examID, student: appointmentArray[i].student, date: prettyDate(appointmentArray[i].day),
-							time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime),
-							cancel: "/admin/list/?cancel=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
-							modify: "/admin/list/?modify=" +  appointmentArray[i].student + "&exam=" + appointmentArray[i].examID,
+					if(appointmentArray.attended == false) {
+						args.data.push({course: appointmentArray.examID, student: appointmentArray.student, date: prettyDate(appointmentArray.day),
+							time: msToTime(appointmentArray.startTime) + " to " + msToTime(appointmentArray.endTime),
+							cancel: "/admin/list/?cancel=" +  appointmentArray.student + "&exam=" + appointmentArray.examID,
+							modify: "/admin/list/?modify=" +  appointmentArray.student + "&exam=" + appointmentArray.examID,
 						});
 					}
-				}
+				})	
 				callback();
 			});		
 		break;
@@ -402,26 +416,21 @@ exports.makeArgsStudent = function(req, args, callback) {
 		case "add":
 			args.action = "/student/add"; //POST action
 			args.exams = [];
-			//get the roster collection objects into an array
-			roster.find({Roster: req.user.NetID}).toArray(function(err, rosterArray) {
-				rosterArray.forEach(function(rosterArray) {
-					//find each exam with this class id
-					exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
-						examArray.forEach(function (examArray) {
-							appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
-								if(err) {
-									console.log(err);
-								}
-								if(alreadySigned == null) {
-									if(examArray.status == 'approved') {
-										//push each class with an exam that's approved to display to user
-										args.exams.push({name: examArray.examID, value: examArray.examID});
-									}
-								}
-							});		
-						});	
-					});
-				});
+			//find each exam with this class id
+			exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
+				examArray.forEach(function (examArray) {
+					appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
+						if(err) {
+							console.log(err);
+						}
+						if(alreadySigned == null) {
+							if(examArray.status == 'approved') {
+								//push each class with an exam that's approved to display to user
+								args.exams.push({name: examArray.examID, value: examArray.examID});
+							}
+						}
+					});		
+				});	
 				callback(args);
 			});
 		break;
