@@ -404,17 +404,24 @@ exports.makeArgsStudent = function(req, args, callback) {
 			args.exams = [];
 			//get the roster collection objects into an array
 			roster.find({Roster: req.user.NetID}).toArray(function(err, rosterArray) {
-				for(i in rosterArray) {
+				rosterArray.forEach(function(rosterArray) {
 					//find each exam with this class id
-					exams.find({ClassID: rosterArray[i].ClassID}).toArray(function(err, examArray) {
-						for(j in examArray) {
-							//push each class with an exam that's approved to display to user
-							if(examArray[j].status == 'approved') {
-								args.exams.push({name: examArray[j].examID, value: examArray[j].examID});
-							}
-						}
+					exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
+						examArray.forEach(function (examArray) {
+							appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
+								if(err) {
+									console.log(err);
+								}
+								if(alreadySigned == null) {
+									if(examArray.status == 'approved') {
+										//push each class with an exam that's approved to display to user
+										args.exams.push({name: examArray.examID, value: examArray.examID});
+									}
+								}
+							});		
+						});	
 					});
-				}
+				});
 				callback(args);
 			});
 		break;

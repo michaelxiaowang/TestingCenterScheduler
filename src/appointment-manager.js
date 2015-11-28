@@ -7,7 +7,6 @@ var testingcenters = db.collection('testingcenters');
 
 /*Creates a new appointment*/
 exports.studentCreateAppointment = function(req, callback) {
-	var seatNum; //1-numSeats is regular, numSeats+1-numSeats+numSetAside are set-aside
 
 	//Check if appointment starts on hour or half-hour
 	if(req.body.minute != 0 && req.body.minute != 30) {
@@ -50,8 +49,6 @@ exports.studentCreateAppointment = function(req, callback) {
 
 			//Check if start and end are entirely within operating hours
 			if(start < TC.OperatingHours[date.getDay()][0] || start + exam.duration > TC.OperatingHours[date.getDay()][1]) {
-				console.log(start);
-				console.log(end);
 				return callback("Appointment is not within the operating hours for this day");
 			}
 
@@ -76,46 +73,94 @@ exports.studentCreateAppointment = function(req, callback) {
 			}
 
 			//Find all appointments that are on this day
-			/*appointments.find({day: date}).toArray(function(err, Appts) {
+			appointments.find({day: date}).toArray(function(err, Appts) {
 				if(err) {
 					console.log(err);
 				}
 
-				//Sort appointments by seat, then start time
-				Appts.sort(sortAppt);
+				var occupiedSeats = []; //holds info whether seat is empty, occupied or occupied by appt for the same exam
 
-				//check appointment for a conflict
-				var currentSeat = 1; //The seat currently being examined
+				for(var i = 0; i < TC.numSeats; i++) {
+					occupiedSeats.push(0); //0 means seat is empty, we will do analysis
+				}
+
 				for(i in Appts) {
-
-				}
-			});*/
-
-			appointments.find({student: req.user.NetID}).toArray(function(err, sameDay) {
-				if(err) {
-					console.log(err);
-				}
-				//If there is more than 0 appointments
-				if(sameDay.length > 0) {
-					for(i in sameDay) {
-						if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
-							(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
-							return callback("You already have an exam in this time period");
+					//If there is an appointment that overlaps
+					if((Appts[i].startTime >= start && Appts[i].startTime < end) ||
+						(Appts[i].endTime > start && Appts[i].endTime < end)) {
+						if(Appts[i].examID == req.body.exam) {
+							//If it is the same exam occupying that spot
+							occupiedSeats[Appts[i].seat-1] = 2;
+						} else {
+							//If it is a different exam occupying that spot
+							occupiedSeats[Appts[i].seat-1] = 1;
 						}
 					}
 				}
-				appointments.insert({
-					student: req.user.NetID,
-					examID: req.body.exam,
-					day: date,
-					startTime: start,
-					endTime: end,
-					seat: 1,
-					attended: false
-				})
 
+				//Now find a seat from occupied seats
+				var firstAvailable = 0; //first available seat
+				var seatNum = 0;
+				for (i in occupiedSeats) {
+					if(occupiedSeats[i] == 0) { //If the seat is empty
+						if(i == 0) { //If this is the first seat
+							if(occupiedSeats[1] == 0 || occupiedSeats[1] == 1) {//If the second seat is empty or contains a different exam
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						} else if (i == TC.numSeats-1) { //Last seat
+							if(occupiedSeats[TC.numSeats-1] == 0 || occupiedSeats[TC.numSeats-1] == 1) {//If the second seat is empty or contains a different exam
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						} else { //Some seat in middle
+							if((occupiedSeats[parseInt(i)-1] == 0 || occupiedSeats[parseInt(i)-1] == 1) && 
+								(occupiedSeats[parseInt(i)+1] == 0 || occupiedSeats[parseInt(i)+1] == 1)) {
+								seatNum = parseInt(i)+1;
+								break;
+							} else if (firstAvailable == 0) {
+								firstAvailable = parseInt(i)+1;
+							}
+						}
+					}
+				}
+				if(firstAvailable == 0 && seatNum == 0) {
+					return callback("There are no seats available at this time slot");
+				}
+				if(seatNum == 0) {
+					seatNum = firstAvailable;
+				}
+
+				appointments.find({student: req.user.NetID}).toArray(function(err, sameDay) {
+					if(err) {
+						console.log(err);
+					}
+					//If there is more than 0 appointments
+					if(sameDay.length > 0) {
+						for(i in sameDay) {
+							if((sameDay[i].startTime >= start && sameDay[i].startTime < end) ||
+								(sameDay[i].endTime > start && sameDay[i].endTime < end)) {
+								return callback("You already have an exam in this time period");
+							}
+						}
+					}
+					appointments.insert({
+						student: req.user.NetID,
+						examID: req.body.exam,
+						day: date,
+						startTime: start,
+						endTime: end,
+						seat: seatNum,
+						attended: false
+					})
+
+				});
+				return callback("Appointment created.");
 			});	
-			return callback("Appointment created.");	
 		});
 	});
 }

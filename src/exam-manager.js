@@ -66,23 +66,23 @@ exports.createExam = function(req, callback) {
 					console.log(err);
 				}
 				Roster = roster.Roster;
+				//Insert the exam into database
+				var exam = {
+					"ClassID": ClassID,
+					"examID": examID,
+					"Instructors": req.user.NetID,
+					"Roster": Roster,
+					"startTime": startTime,
+					"startDate": startDate,
+					"endTime": endTime,
+					"endDate": endDate,
+					"duration": duration,
+					"adhoc": adhoc,
+					"status": "pending"
+				};
+				//Inform user request was successsful
+				return callback("Success", exam);
 			});
-			//Insert the exam into database
-			var exam = {
-				"ClassID": ClassID,
-				"examID": examID,
-				"Instructors": req.user.NetID,
-				"Roster": Roster,
-				"startTime": startTime,
-				"startDate": startDate,
-				"endTime": endTime,
-				"endDate": endDate,
-				"duration": duration,
-				"adhoc": adhoc,
-				"status": "pending"
-			};
-			//Inform user request was successsful
-			return callback("Success", exam);
 		});
 	} else { //is adhoc
 		//If the name field is empty, inform user
