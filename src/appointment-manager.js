@@ -340,7 +340,7 @@ exports.adminCreateAppointment = function(req, callback) {
 					}
 					if(req.body.seattype == 'normal') {
 						appointments.insert({
-							student: req.user.NetID,
+							student: req.body.student,
 							examID: req.body.course,
 							day: date,
 							startTime: start,
@@ -351,7 +351,7 @@ exports.adminCreateAppointment = function(req, callback) {
 						});
 					} else {
 						appointments.insert({
-							student: req.user.NetID,
+							student: req.body.student,
 							examID: req.body.course,
 							day: date,
 							startTime: start,
