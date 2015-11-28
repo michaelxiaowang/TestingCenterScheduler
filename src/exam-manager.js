@@ -13,11 +13,11 @@ exports.createExam = function(req, callback) {
 	var term = req.body.term;
 	var startDate = new Date(req.body.start_month + " " + req.body.start_day + ", " + req.body.start_year);
 	var endDate = new Date(req.body.end_month + " " + req.body.end_day + ", " + req.body.end_year);
-	var startTime = parseInt(req.body.start_hour)%12 * 3600000 + parseInt(req.body.start_minute) * 60000;
+	var startTime = parseInt(req.body.start_hour) % 12 * 3600000 + parseInt(req.body.start_minute) * 60000;
 	if(req.body.start_ampm == 'pm') {
 		startTime += 43200000;
 	}
-	var endTime = parseInt(req.body.end_hour)%12 * 3600000 + parseInt(req.body.end_minute) * 60000;
+	var endTime = parseInt(req.body.end_hour) % 12 * 3600000 + parseInt(req.body.end_minute) * 60000;
 	if(req.body.end_ampm == 'pm') {
 		endTime += 43200000;
 	}
@@ -70,6 +70,7 @@ exports.createExam = function(req, callback) {
 				var exam = {
 					"ClassID": ClassID,
 					"examID": examID,
+					"term": term,
 					"Instructors": req.user.NetID,
 					"Roster": Roster,
 					"startTime": startTime,
@@ -103,6 +104,7 @@ exports.createExam = function(req, callback) {
 		var exam = {
 			"ClassID": ClassID,
 			"examID": examID,
+			"term": term,
 			"Instructors": req.user.NetID,
 			"Roster": Roster,
 			"startTime": startTime,

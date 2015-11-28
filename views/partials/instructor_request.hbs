@@ -106,6 +106,16 @@
 				</select>
 			</td>
 		</tr>
+		<tr>
+			<td class="left">Term:</td>
+			<td class="right">
+				<select name="term">
+					{{#each terms}}
+						<option value="{{value}}">{{name}}</option>
+					{{/each}}
+				</select>
+			</td>
+		</tr>
 	</table>
 	<table id="course" class="form">
 		<tr>
@@ -122,16 +132,6 @@
 			<td class="left">Exam Name:</td>
 			<td class="right">
 				<input type="text" name="name">
-			</td>
-		</tr>
-		<tr>
-			<td class="left">Term:</td>
-			<td class="right">
-				<select name="term">
-					{{#each terms}}
-						<option value="{{value}}">{{name}}</option>
-					{{/each}}
-				</select>
 			</td>
 		</tr>
 		<tr>

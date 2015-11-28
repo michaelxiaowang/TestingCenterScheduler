@@ -32,7 +32,7 @@ exports.studentCreateAppointment = function(req, callback) {
 		}
 		
 		//Find which term this exam is for
-		testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
+		testingcenters.findOne({Term: exam.term}, function(err, TC) {
 			if(err) {
 				console.log(err);
 			}
@@ -154,6 +154,7 @@ exports.studentCreateAppointment = function(req, callback) {
 						}
 					}
 					appointments.insert({
+						term: exam.term,
 						student: req.user.NetID,
 						examID: req.body.exam,
 						day: date,
@@ -196,7 +197,7 @@ exports.adminCreateAppointment = function(req, callback) {
 		}
 		
 		//Find which term this exam is for
-		testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
+		testingcenters.findOne({Term: exam.term}, function(err, TC) {
 			if(err) {
 				console.log(err);
 			}
@@ -340,6 +341,7 @@ exports.adminCreateAppointment = function(req, callback) {
 					}
 					if(req.body.seattype == 'normal') {
 						appointments.insert({
+							term: exam.term,
 							student: req.body.student,
 							examID: req.body.course,
 							day: date,
@@ -351,6 +353,7 @@ exports.adminCreateAppointment = function(req, callback) {
 						});
 					} else {
 						appointments.insert({
+							term: exam.term,
 							student: req.body.student,
 							examID: req.body.course,
 							day: date,
@@ -409,39 +412,6 @@ exports.adminCancel = function(student, exam) {
 	appointments.remove({"student": student, examID: exam});
 }
 
-function sortAppt(appt1, appt2) {
-	if(appt1.seatNumber < appt2.seatNumber) {
-		return -1;
-	}
-	if(appt2.seatNumber < appt1.seatNumber) {
-		return 1;
-	}
-	if(appt1.startTime < appt2.startTime) {
-		return -1;
-	}
-	if(appt2.startTime < appt1.startTime) {
-		return 1;
-	}
-}
-
-function sortApptByTime(appt1, appt2) {
-	if(appt1.startTime < appt2.startTime) {
-		return -1;
-	}
-	if(appt2.startTime < appt1.startTime) {
-		return 1;
-	}
-}
-
-function sortApptBySeat(appt1, appt2) {
-	if(appt1.seatNumber < appt2.seatNumber) {
-		return -1;
-	}
-	if(appt2.seatNumber < appt1.seatNumber) {
-		return 1;
-	}
-}
-
 //Gets the format of a Date in: Day of Week, Month Day of Month, Year
 function prettyDate(date) {
 	var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -464,7 +434,7 @@ function prettyDate(date) {
 function getAvailableTimeslots(exam, callback) {
 
 	//Find the testing center for this term
-	testingcenters.findOne({Term: exam.ClassID.substring(exam.ClassID.indexOf('-') + 1)}, function(err, TC) {
+	testingcenters.findOne({Term: exam.term}, function(err, TC) {
 
 		//If the exam period doesn't start on a half hour, find the first half hour
 		if(exam.startTime % 1800000 != 0) {
