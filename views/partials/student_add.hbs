@@ -1,16 +1,26 @@
 <div id="text">Please select a course and time:</div>
 <div id="content">
+	<form action="{{action}}" method="get">
+		<table id = "form">
+			<tr>
+				<td class="left">Exam:</td>
+				<td class="right">
+					<select name="exam">
+						{{#each exams}}
+							<option value="{{value}}">{{name}}</option>
+						{{/each}}
+					</select>
+				</td>
+				<td class="action">
+					<input type="submit" value="Check times">
+				</td>
+			</tr>
+		</table>
+	</form>
 	<form action="{{action}}" method="post">
 	<table id="form">
 		<tr>
-			<td class="left">Exam:</td>
-			<td class="right">
-				<select name="exam">
-					{{#each exams}}
-						<option value="{{value}}">{{name}}</option>
-					{{/each}}
-				</select>
-			</td>
+			<input type = 'hidden' name = "exam" value = {{name}}>
 		</tr>
 		<tr>
 			<td class="left">Time:</td>

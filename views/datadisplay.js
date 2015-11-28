@@ -421,23 +421,51 @@ exports.makeArgsStudent = function(req, args, callback) {
 		case "add":
 			args.action = "/student/add"; //POST action
 			args.exams = [];
-			//find each exam with this class id
-			exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
-				examArray.forEach(function (examArray) {
-					appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
-						if(err) {
-							console.log(err);
-						}
-						if(alreadySigned == null) {
-							if(examArray.status == 'approved') {
-								//push each class with an exam that's approved to display to user
-								args.exams.push({name: examArray.examID, value: examArray.examID});
+			if(req.query.exam) {
+				exams.findOne({examID: req.query.exam}, function(err, Exam) {
+					if(err) {
+						console.log(err);
+					}
+					AM.getAvailableTimeslots(Exam, function(result) {
+						args.result = result;
+						//find each exam with this class id
+						exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
+							examArray.forEach(function (examArray) {
+								appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
+									if(err) {
+										console.log(err);
+									}
+									if(alreadySigned == null) {
+										if(examArray.status == 'approved') {
+											//push each class with an exam that's approved to display to user
+											args.exams.push({name: examArray.examID, value: examArray.examID});
+										}
+									}
+								});		
+							});	
+							callback(args);
+						});
+					});
+				});
+			} else {
+				//find each exam with this class id
+				exams.find({Roster: req.user.NetID}).toArray(function(err, examArray) {
+					examArray.forEach(function (examArray) {
+						appointments.findOne({student: req.user.NetID, examID: examArray.examID}, function(err, alreadySigned) {
+							if(err) {
+								console.log(err);
 							}
-						}
-					});		
-				});	
-				callback(args);
-			});
+							if(alreadySigned == null) {
+								if(examArray.status == 'approved') {
+									//push each class with an exam that's approved to display to user
+									args.exams.push({name: examArray.examID, value: examArray.examID});
+								}
+							}
+						});		
+					});	
+					callback(args);
+				});
+			}
 		break;
 		case "cancel":
 			args.action = "/student/cancel"; //POST action
@@ -451,11 +479,15 @@ exports.makeArgsStudent = function(req, args, callback) {
 				for(i in appointmentArray) {
 					args.exams.push({name: appointmentArray[i].examID, value: appointmentArray[i].examID});
 				}
-			})
-			//If a query exists, pre-select the particular exam
-			if (args.exams[req.query.exam]) {
-				args.exams[req.query.exam].selected = true;
-			}
+				//If a query exists, pre-select the particular exam
+				if (req.query.exam) {
+					for(var i = 0; i < args.exams.length; i++) {
+						if(args.exams[i].name == req.query.exam) {
+							args.exams[i].selected = true;
+						}
+					}
+				}
+			});
 			callback(args);
 		break;
 		case "list":
@@ -466,7 +498,7 @@ exports.makeArgsStudent = function(req, args, callback) {
 				}
 				for(i in appointmentArray) {
 					args.data.push({class: appointmentArray[i].examID, date: prettyDate(appointmentArray[i].day), 
-						time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), cancel: "/student/cancel?exam=" + i});
+						time: msToTime(appointmentArray[i].startTime) + " to " + msToTime(appointmentArray[i].endTime), cancel: "/student/cancel?exam=" + appointmentArray[i].examID});
 				}
 			})
 			callback(args);
@@ -475,6 +507,48 @@ exports.makeArgsStudent = function(req, args, callback) {
 };
 
 
+//Display Utilization
+exports.displayUtilization = function(req, args, callback) {
+	req.body.from_term;
+	req.body.from_month;
+	req.body.from_day;
+	var examIDs;
+	if(req.body.from_term == req.body.to_term) { //If it is same term, find exams in this range
+		if(req.body.from_month > req.body.to_month) {
+			return callback("The second time is before the first time");
+		} else if(req.body.from_month == req.body.to_month) {
+			if(req.body.from_day > req.body.to_day) {
+				return callback("The second time is before the first time");
+			}
+		}
+		exams.find({term: req.body.from_term}).toArray(function(err, Exams) {
+			if(err) {
+				console.log(err);
+			}
+			examIDs = Exams;
+			callback("");
+		});
+	} else {
+		if(req.body.to_term < req.body.from_term) {
+			return callback("The second term is earlier than the first term");
+		} else {
+			exams.find({term: req.body.from_term}).toArray(function(err, Exams1) {
+				if(err) {
+					console.log(err);
+				}
+				exams.find({term: req.body.to_term}).toArray(function(err, Exams2) {
+					if(err) {
+						console.log(err);
+					}
+					examIDs = Exams1.concat(Exams2);
+					callback("");
+				});
+			});
+		}
+	}
+}
+
+//Generate reports
 exports.generateReport = function(req, args, callback) {
 	var type	= req.body.type; //'day' 'week' 'term' or 'range'
 	var start	= req.body.start; //term

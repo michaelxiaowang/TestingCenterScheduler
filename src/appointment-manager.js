@@ -8,6 +8,10 @@ var testingcenters = db.collection('testingcenters');
 /*Creates a new appointment*/
 exports.studentCreateAppointment = function(req, callback) {
 
+	if(req.body.exam == null || req.body.exam == "") {
+		return callback("No exam selected");
+	}
+
 	//Check if student already has appointment for this exam
 	appointments.findOne({student: req.User.NetID, examID: req.body.exam}, function(err, exists) {
 		if(err) {
@@ -25,17 +29,6 @@ exports.studentCreateAppointment = function(req, callback) {
 
 	//Find the exam with this specific id
 	exams.findOne({examID: req.body.exam}, function(err, exam) {
-
-		getAvailableTimeslots(exam, function(result) {
-			/*var informTimes = "Available times for this exam are:                         " + "\\n"; //some space for formatting
-			for(i in result) {
-				var dateString = prettyDate(result[i]);
-				informTimes = informTimes + dateString + "\\n";
-			}
-			return callback(informTimes);*/
-
-		});
-		
 
 		if(err) {
 			console.log(err);
@@ -186,6 +179,10 @@ exports.studentCreateAppointment = function(req, callback) {
 /*Creates a new appointment*/
 exports.adminCreateAppointment = function(req, callback) {
 
+	if(req.body.course == null || req.body.course == "") {
+		return callback("No exam selected");
+	}
+
 	//Check if student already has appointment for this exam
 	appointments.findOne({student: req.body.student, examID: req.body.cours}, function(err, exists) {
 		if(err) {
@@ -203,18 +200,7 @@ exports.adminCreateAppointment = function(req, callback) {
 
 	//Find the exam with this specific id
 	exams.findOne({examID: req.body.course}, function(err, exam) {
-
-		getAvailableTimeslots(exam, function(result) {
-			/*var informTimes = "Available times for this exam are:                         " + "\\n"; //some space for formatting
-			for(i in result) {
-				var dateString = prettyDate(result[i]);
-				informTimes = informTimes + dateString + "\\n";
-			}
-			return callback(informTimes);*/
-
-		});
 		
-
 		if(err) {
 			console.log(err);
 		}
@@ -456,7 +442,7 @@ function prettyDate(date) {
 	return days[date.getDay()] + ", " + months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear() + " at " + hours + ":" + minutes + ampm;
 }
 
-function getAvailableTimeslots(exam, callback) {
+exports.getAvailableTimeslots = function(exam, callback) {
 
 	//Find the testing center for this term
 	testingcenters.findOne({Term: exam.term}, function(err, TC) {
@@ -506,7 +492,7 @@ function getAvailableTimeslots(exam, callback) {
 			//If all three time conditions are met
 			if(withinOH && notRD && notCD) {
 				var d = new Date(z);
-				d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(z % 86400000/3600000), Math.floor(z % 86400000 % 3600000/60000));
+				d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor((z % 86400000)/3600000), Math.floor(z % 86400000 % 3600000/60000));
 				validTimes.push(d);
 			}
 		}
@@ -527,8 +513,8 @@ function getAvailableTimeslots(exam, callback) {
 						if(Appts[k].seat == j && 
 							Appts[k].startTime.getTime() >= validTimes[i].getTime() && 
 							Appts[k].startTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime * 60000 ||
-							Appts[k].endTime.getTime() >= validTimes[i].getTime() && 
-							Appts[k].endTime.getTime() <= validTimes[i].getTime() + exam.duration + TC.gapTime * 60000) {
+							Appts[k].endTime.getTime() + TC.gapTime * 60000 >= validTimes[i].getTime() && 
+							Appts[k].endTime.getTime() + TC.gapTime * 60000 <= validTimes[i].getTime() + exam.duration + TC.gapTime * 60000) {
 							taken = true;
 						}
 					}
@@ -538,7 +524,11 @@ function getAvailableTimeslots(exam, callback) {
 				}
 			}
 
-			return callback(availableTimes);
+			var returnString = "All available times are \\n";
+			availableTimes.forEach(function(time) {
+				returnString += (prettyDate(time) + "\\n");
+			});
+			return callback(returnString);
 		});
 	});
 }

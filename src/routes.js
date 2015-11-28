@@ -305,7 +305,12 @@ module.exports = function(app, fs) {
 				break;
 				case "util":
 					DD.makeArgsAdmin(req, args, function() {
-						res.render('frame', args);
+						DD.displayUtilization(req, args, function(result) {
+							if(result != "") {
+								args.result = result;
+							}
+							res.render('frame', args);
+						});
 					});	
 				break;
 			}
